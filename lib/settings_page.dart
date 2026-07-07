@@ -160,7 +160,10 @@ class _SettingsPageState extends State<SettingsPage> {
                 decoration: InputDecoration(
                   hintText: '[{"timestamp": "...", "volumeMl": 250}, ...]',
                   hintStyle: TextStyle(color: Colors.grey[600]),
-                  border: const OutlineInputBorder(),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
                   filled: true,
                   fillColor: Colors.black26,
                 ),
@@ -267,9 +270,7 @@ class _SettingsPageState extends State<SettingsPage> {
       backgroundColor: theme.colorScheme.onSurface.withOpacity(0.03),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
-          color: isSelected ? theme.colorScheme.primary.withOpacity(0.4) : (isLight ? Colors.black.withOpacity(0.05) : Colors.white10),
-        ),
+        side: BorderSide.none,
       ),
     );
   }
@@ -301,9 +302,7 @@ class _SettingsPageState extends State<SettingsPage> {
       backgroundColor: theme.colorScheme.onSurface.withOpacity(0.03),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
-          color: isSelected ? theme.colorScheme.primary.withOpacity(0.4) : (isLight ? Colors.black.withOpacity(0.05) : Colors.white10),
-        ),
+        side: BorderSide.none,
       ),
     );
   }
@@ -443,11 +442,11 @@ class _SettingsPageState extends State<SettingsPage> {
                                   contentPadding: EdgeInsets.zero,
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(8),
-                                    borderSide: BorderSide(color: theme.colorScheme.onSurface.withOpacity(0.1)),
+                                    borderSide: BorderSide.none,
                                   ),
                                   focusedBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(8),
-                                    borderSide: BorderSide(color: theme.colorScheme.primary),
+                                    borderSide: BorderSide(color: theme.colorScheme.primary.withOpacity(0.5)),
                                   ),
                                   filled: true,
                                   fillColor: theme.colorScheme.onSurface.withOpacity(0.05),
@@ -583,11 +582,11 @@ class _SettingsPageState extends State<SettingsPage> {
                                     contentPadding: EdgeInsets.zero,
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(8),
-                                      borderSide: BorderSide(color: theme.colorScheme.onSurface.withOpacity(0.1)),
+                                      borderSide: BorderSide.none,
                                     ),
                                     focusedBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(8),
-                                      borderSide: BorderSide(color: theme.colorScheme.primary),
+                                      borderSide: BorderSide(color: theme.colorScheme.primary.withOpacity(0.5)),
                                     ),
                                     filled: true,
                                     fillColor: theme.colorScheme.onSurface.withOpacity(0.05),
@@ -721,13 +720,13 @@ class _SettingsPageState extends State<SettingsPage> {
 
             // Reset history button
             Center(
-              child: OutlinedButton.icon(
+              child: TextButton.icon(
                 onPressed: _handleReset,
-                style: OutlinedButton.styleFrom(
+                style: TextButton.styleFrom(
                   foregroundColor: _confirmReset ? Colors.redAccent : (isLight ? Colors.grey[700] : Colors.grey[400]),
-                  side: BorderSide(
-                    color: _confirmReset ? Colors.redAccent.withOpacity(0.5) : (isLight ? Colors.black.withOpacity(0.1) : Colors.white10),
-                  ),
+                  backgroundColor: _confirmReset
+                      ? Colors.redAccent.withOpacity(0.1)
+                      : (isLight ? Colors.black.withOpacity(0.03) : Colors.white.withOpacity(0.03)),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),

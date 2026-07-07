@@ -330,10 +330,7 @@ class _StatsPageState extends State<StatsPage> {
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: todayLogs.length,
-                    separatorBuilder: (context, index) => Divider(
-                      height: 1,
-                      color: isLight ? Colors.black.withOpacity(0.05) : Colors.white.withOpacity(0.05),
-                    ),
+                    separatorBuilder: (context, index) => const SizedBox(height: 8),
                     itemBuilder: (context, index) {
                       final entry = todayLogs[todayLogs.length - 1 - index];
                       return ListTile(

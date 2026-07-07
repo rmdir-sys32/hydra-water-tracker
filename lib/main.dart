@@ -60,11 +60,11 @@ class _MyAppState extends State<MyApp> {
             ),
           ),
           darkTheme: ThemeData.dark().copyWith(
-            scaffoldBackgroundColor: const Color(0xFF0B132B), // Dark Navy
+            scaffoldBackgroundColor: const Color(0xFF090D1A), // Rich Deep Navy/Black
             colorScheme: const ColorScheme.dark(
               primary: Color(0xFF0EA5E9),   // Sky Blue
               secondary: Color(0xFF38BDF8), // Light Sky Blue
-              surface: Color(0xFF1C2541),   // Dark Midnight Navy
+              surface: Color(0xFF131A30),   // Dark Slate Navy Surface
               onSurface: Colors.white,
             ),
           ),

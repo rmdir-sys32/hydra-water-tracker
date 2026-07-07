@@ -211,10 +211,7 @@ class _AlarmPageState extends State<AlarmPage> {
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: _fixedReminders.length,
-                    separatorBuilder: (context, index) => Divider(
-                      height: 1,
-                      color: isLight ? Colors.black.withOpacity(0.05) : Colors.white.withOpacity(0.05),
-                    ),
+                    separatorBuilder: (context, index) => const SizedBox(height: 8),
                     itemBuilder: (context, index) {
                       final item = _fixedReminders[index];
                       final bool isEnabled = item['enabled'] as bool;
