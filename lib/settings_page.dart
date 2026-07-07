@@ -21,6 +21,7 @@ class _SettingsPageState extends State<SettingsPage> {
   int _defaultVolume = 250;
   String _activePreset = '250';
   int _dailyGoal = 2000;
+  String _themeMode = 'light';
 
   final TextEditingController _volumeController = TextEditingController();
   final TextEditingController _goalController = TextEditingController();
@@ -51,6 +52,8 @@ class _SettingsPageState extends State<SettingsPage> {
 
       _dailyGoal = _prefs?.getInt('daily_goal') ?? 2000;
       _goalController.text = _dailyGoal.toString();
+
+      _themeMode = _prefs?.getString('theme_mode') ?? 'light';
     });
   }
 
@@ -234,6 +237,7 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget _buildPresetChip(String label, String valueKey, int targetMl) {
     final theme = Theme.of(context);
     final isSelected = _activePreset == valueKey;
+    final isLight = theme.brightness == Brightness.light;
     return ChoiceChip(
       label: Text(label),
       selected: isSelected,
@@ -256,15 +260,49 @@ class _SettingsPageState extends State<SettingsPage> {
       selectedColor: theme.colorScheme.primary.withOpacity(0.18),
       checkmarkColor: theme.colorScheme.primary,
       labelStyle: TextStyle(
-        color: isSelected ? theme.colorScheme.primary : Colors.grey[400],
+        color: isSelected ? theme.colorScheme.primary : (isLight ? Colors.grey[600] : Colors.grey[400]),
         fontWeight: FontWeight.bold,
         fontSize: 13,
       ),
-      backgroundColor: Colors.white.withOpacity(0.03),
+      backgroundColor: theme.colorScheme.onSurface.withOpacity(0.03),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
-          color: isSelected ? theme.colorScheme.primary.withOpacity(0.4) : Colors.white10,
+          color: isSelected ? theme.colorScheme.primary.withOpacity(0.4) : (isLight ? Colors.black.withOpacity(0.05) : Colors.white10),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildThemeChip(String label, String valueKey, ThemeMode mode) {
+    final theme = Theme.of(context);
+    final isSelected = _themeMode == valueKey;
+    final isLight = theme.brightness == Brightness.light;
+    return ChoiceChip(
+      label: Text(label),
+      selected: isSelected,
+      onSelected: (selected) {
+        if (selected) {
+          setState(() {
+            _themeMode = valueKey;
+          });
+          _prefs?.setString('theme_mode', valueKey);
+          MyApp.themeNotifier.value = mode;
+          widget.onSettingsChanged?.call();
+        }
+      },
+      selectedColor: theme.colorScheme.primary.withOpacity(0.18),
+      checkmarkColor: theme.colorScheme.primary,
+      labelStyle: TextStyle(
+        color: isSelected ? theme.colorScheme.primary : (isLight ? Colors.grey[600] : Colors.grey[400]),
+        fontWeight: FontWeight.bold,
+        fontSize: 13,
+      ),
+      backgroundColor: theme.colorScheme.onSurface.withOpacity(0.03),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: isSelected ? theme.colorScheme.primary.withOpacity(0.4) : (isLight ? Colors.black.withOpacity(0.05) : Colors.white10),
         ),
       ),
     );
@@ -273,6 +311,7 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isLight = theme.brightness == Brightness.light;
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -286,32 +325,78 @@ class _SettingsPageState extends State<SettingsPage> {
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
           children: [
-            // Daily Goal Editor Card
+            // App Theme Card
             LiquidGlass.withOwnLayer(
               shape: const LiquidRoundedRectangle(borderRadius: 14),
               settings: LiquidGlassSettings(
-                glassColor: theme.colorScheme.surface.withOpacity(0.55),
+                glassColor: theme.colorScheme.surface.withOpacity(isLight ? 0.55 : 0.35),
                 blur: 10,
               ),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: Colors.white.withOpacity(0.8)),
+                  border: Border.all(color: isLight ? Colors.white.withOpacity(0.8) : Colors.white.withOpacity(0.08)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.flag_rounded, size: 18, color: Colors.grey[400]),
+                        Icon(Icons.palette_rounded, size: 18, color: isLight ? Colors.grey[600] : Colors.grey[400]),
+                        const SizedBox(width: 8),
+                         Text(
+                          'App Theme',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: theme.colorScheme.onSurface,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        _buildThemeChip('Light Mode', 'light', ThemeMode.light),
+                        _buildThemeChip('Dark Mode', 'dark', ThemeMode.dark),
+                        _buildThemeChip('System', 'system', ThemeMode.system),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Daily Goal Editor Card
+            LiquidGlass.withOwnLayer(
+              shape: const LiquidRoundedRectangle(borderRadius: 14),
+              settings: LiquidGlassSettings(
+                glassColor: theme.colorScheme.surface.withOpacity(isLight ? 0.55 : 0.35),
+                blur: 10,
+              ),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: isLight ? Colors.white.withOpacity(0.8) : Colors.white.withOpacity(0.08)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.flag_rounded, size: 18, color: isLight ? Colors.grey[700] : Colors.grey[300]),
                         const SizedBox(width: 8),
                         Text(
                           'Daily Goal',
                           style: TextStyle(
                             fontSize: 14,
-                            color: Colors.grey[300],
-                            fontWeight: FontWeight.w600,
+                            color: theme.colorScheme.onSurface,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                       ],
@@ -322,7 +407,11 @@ class _SettingsPageState extends State<SettingsPage> {
                       children: [
                         Text(
                           'Adjust Target:',
-                          style: TextStyle(fontSize: 13, color: Colors.grey[400]),
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: theme.colorScheme.onSurface,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                         Row(
                           children: [
@@ -395,7 +484,7 @@ class _SettingsPageState extends State<SettingsPage> {
                               'ml',
                               style: TextStyle(
                                   fontSize: 14,
-                                  color: Colors.grey[400],
+                                  color: theme.colorScheme.onSurface,
                                   fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -413,35 +502,36 @@ class _SettingsPageState extends State<SettingsPage> {
             LiquidGlass.withOwnLayer(
               shape: const LiquidRoundedRectangle(borderRadius: 14),
               settings: LiquidGlassSettings(
-                glassColor: theme.colorScheme.surface.withOpacity(0.55),
+                glassColor: theme.colorScheme.surface.withOpacity(isLight ? 0.55 : 0.35),
                 blur: 10,
               ),
               child: Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: Colors.white.withOpacity(0.8)),
+                  border: Border.all(color: isLight ? Colors.white.withOpacity(0.8) : Colors.white.withOpacity(0.08)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.tune_rounded, size: 18, color: Colors.grey[400]),
+                        Icon(Icons.tune_rounded, size: 18, color: isLight ? Colors.grey[700] : Colors.grey[300]),
                         const SizedBox(width: 8),
                         Text(
                           'Tap Volume',
                           style: TextStyle(
                             fontSize: 14,
-                            color: Colors.grey[300],
-                            fontWeight: FontWeight.w600,
+                            color: theme.colorScheme.onSurface,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 12),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
                       children: [
                         _buildPresetChip('250ml', '250', 250),
                         _buildPresetChip('500ml', '500', 500),
@@ -458,7 +548,8 @@ class _SettingsPageState extends State<SettingsPage> {
                             'Custom size:',
                             style: TextStyle(
                               fontSize: 13,
-                              color: Colors.grey[400],
+                              color: theme.colorScheme.onSurface,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
                           Row(
@@ -536,7 +627,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                 'ml',
                                 style: TextStyle(
                                   fontSize: 14,
-                                  color: Colors.grey[400],
+                                  color: theme.colorScheme.onSurface,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -555,28 +646,28 @@ class _SettingsPageState extends State<SettingsPage> {
             LiquidGlass.withOwnLayer(
               shape: const LiquidRoundedRectangle(borderRadius: 14),
               settings: LiquidGlassSettings(
-                glassColor: theme.colorScheme.surface.withOpacity(0.55),
+                glassColor: theme.colorScheme.surface.withOpacity(isLight ? 0.55 : 0.35),
                 blur: 10,
               ),
               child: Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: Colors.white.withOpacity(0.8)),
+                  border: Border.all(color: isLight ? Colors.white.withOpacity(0.8) : Colors.white.withOpacity(0.08)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.save_rounded, size: 18, color: Colors.grey[400]),
+                        Icon(Icons.save_rounded, size: 18, color: isLight ? Colors.grey[700] : Colors.grey[300]),
                         const SizedBox(width: 8),
                         Text(
                           'Data Backup & Restore',
                           style: TextStyle(
                             fontSize: 14,
-                            color: Colors.grey[300],
-                            fontWeight: FontWeight.w600,
+                            color: theme.colorScheme.onSurface,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                       ],
@@ -584,7 +675,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     const SizedBox(height: 6),
                     Text(
                       'Export your local water logs JSON to your clipboard or import a backup string.',
-                      style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                      style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurface),
                     ),
                     const SizedBox(height: 16),
                     Row(
@@ -637,9 +728,9 @@ class _SettingsPageState extends State<SettingsPage> {
               child: OutlinedButton.icon(
                 onPressed: _handleReset,
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: _confirmReset ? Colors.redAccent : Colors.grey[500],
+                  foregroundColor: _confirmReset ? Colors.redAccent : (isLight ? Colors.grey[700] : Colors.grey[400]),
                   side: BorderSide(
-                    color: _confirmReset ? Colors.redAccent.withOpacity(0.5) : Colors.white10,
+                    color: _confirmReset ? Colors.redAccent.withOpacity(0.5) : (isLight ? Colors.black.withOpacity(0.1) : Colors.white10),
                   ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),

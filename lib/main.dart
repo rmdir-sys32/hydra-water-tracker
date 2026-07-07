@@ -13,24 +13,64 @@ void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  static final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.light);
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
+  void initState() {
+    super.initState();
+    _loadThemeMode();
+  }
+
+  Future<void> _loadThemeMode() async {
+    final prefs = await SharedPreferences.getInstance();
+    final modeStr = prefs.getString('theme_mode') ?? 'light';
+    if (modeStr == 'dark') {
+      MyApp.themeNotifier.value = ThemeMode.dark;
+    } else if (modeStr == 'system') {
+      MyApp.themeNotifier.value = ThemeMode.system;
+    } else {
+      MyApp.themeNotifier.value = ThemeMode.light;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Hydrated',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData.light().copyWith(
-        scaffoldBackgroundColor: const Color(0xFFF1F5F9), // Soft Slate Gray
-        colorScheme: const ColorScheme.light(
-          primary: Color(0xFF0D9488),   // Soft Fresh Teal/Water
-          secondary: Color(0xFF3B82F6), // Clean Water Blue
-          surface: Colors.white,        // White surfaces for glassmorphism
-          onSurface: Color(0xFF0F172A), // Dark slate text
-        ),
-      ),
-      home: const WaterTrackerPage(),
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: MyApp.themeNotifier,
+      builder: (_, ThemeMode currentMode, __) {
+        return MaterialApp(
+          title: 'Hydrated',
+          debugShowCheckedModeBanner: false,
+          themeMode: currentMode,
+          theme: ThemeData.light().copyWith(
+            scaffoldBackgroundColor: const Color(0xFFF1F5F9), // Soft Slate Gray
+            colorScheme: const ColorScheme.light(
+              primary: Color(0xFF0D9488),   // Soft Fresh Teal/Water
+              secondary: Color(0xFF3B82F6), // Clean Water Blue
+              surface: Colors.white,        // White surfaces for glassmorphism
+              onSurface: Color(0xFF0F172A), // Dark slate text
+            ),
+          ),
+          darkTheme: ThemeData.dark().copyWith(
+            scaffoldBackgroundColor: const Color(0xFF0B132B), // Dark Navy
+            colorScheme: const ColorScheme.dark(
+              primary: Color(0xFF0D9488),   // Soft Fresh Teal/Water (no neon AI blue)
+              secondary: Color(0xFF3B82F6), // Clean Water Blue
+              surface: Color(0xFF1C2541),   // Dark Midnight Navy
+              onSurface: Colors.white,
+            ),
+          ),
+          home: const WaterTrackerPage(),
+        );
+      },
     );
   }
 }
@@ -362,6 +402,7 @@ class _WaterTrackerPageState extends State<WaterTrackerPage> with WidgetsBinding
           logs: _logs,
           dailyGoal: _dailyGoal,
           onLogDrink: (volume, type) => _logWater(volume, type),
+          onDeleteEntry: _deleteEntry,
           nfcStatus: _status,
           nfcAvailable: _nfcAvailable,
           isPolling: _isPolling,

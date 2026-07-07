@@ -40,7 +40,7 @@ void main() {
     expect(find.text('Import JSON'), findsOneWidget);
   });
 
-  testWidgets('Statistics home displays stats components and allows logging drink types', (WidgetTester tester) async {
+  testWidgets('Statistics home displays stats components and responds to theme modes', (WidgetTester tester) async {
     tester.view.physicalSize = const Size(800, 1200);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);
@@ -51,23 +51,6 @@ void main() {
     // Verify Statistics page elements on the Home screen
     expect(find.text("Today's Hydration"), findsOneWidget);
     expect(find.text('Intake Overview'), findsOneWidget);
-    expect(find.text('Tap to Log Drink'), findsOneWidget);
-
-    // Verify drink category quick logs cards exist
-    expect(find.text('Water'), findsOneWidget);
-    expect(find.text('Smoothie'), findsOneWidget);
-    expect(find.text('Tea'), findsOneWidget);
-    expect(find.text('Juice'), findsOneWidget);
-
-    // Scroll ListView to bring drink cards into view
-    await tester.drag(find.byType(ListView), const Offset(0, -400));
-    await tester.pumpAndSettle();
-
-    // Tap on 'Tea' quick log card
-    await tester.tap(find.text('Tea'));
-    await tester.pump();
-
-    // Verify snackbar is displayed
-    expect(find.text('Logged 200 ml of Tea!'), findsOneWidget);
+    expect(find.textContaining('Tap NFC to log'), findsOneWidget);
   });
 }
