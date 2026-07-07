@@ -382,6 +382,7 @@ class _WaterTrackerPageState extends State<WaterTrackerPage> with WidgetsBinding
           logs: _logs,
           dailyGoal: _dailyGoal,
           onLogDrink: (volume, type) => _logWater(volume, type),
+          onDeleteEntry: _deleteEntry,
           nfcStatus: _status,
           nfcAvailable: _nfcAvailable,
           isPolling: _isPolling,
