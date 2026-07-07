@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:liquid_glass_renderer/liquid_glass_renderer.dart';
 import 'main.dart'; // To access WaterLogEntry
 
 class StatsPage extends StatefulWidget {
@@ -114,210 +115,228 @@ class _StatsPageState extends State<StatsPage> {
             const SizedBox(height: 16),
 
             // NFC Status Banner
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              decoration: BoxDecoration(
-                color: widget.isPolling ? theme.colorScheme.primary.withOpacity(0.08) : Colors.white.withOpacity(0.02),
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(
-                  color: widget.isPolling ? theme.colorScheme.primary.withOpacity(0.2) : Colors.white.withOpacity(0.04),
-                ),
+            LiquidGlass.withOwnLayer(
+              shape: const LiquidRoundedRectangle(borderRadius: 14),
+              settings: LiquidGlassSettings(
+                glassColor: widget.isPolling ? theme.colorScheme.primary.withOpacity(0.1) : theme.colorScheme.surface.withOpacity(0.65),
+                blur: 10,
               ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 8,
-                    height: 8,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: !widget.nfcAvailable 
-                          ? Colors.red 
-                          : (widget.isPolling ? theme.colorScheme.primary : Colors.grey),
-                    ),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: widget.isPolling ? theme.colorScheme.primary.withOpacity(0.3) : Colors.white.withOpacity(0.7),
                   ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      widget.nfcStatus,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: widget.isPolling ? theme.colorScheme.primary : Colors.grey[400],
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: !widget.nfcAvailable 
+                            ? Colors.red 
+                            : (widget.isPolling ? theme.colorScheme.primary : Colors.grey),
                       ),
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        widget.nfcStatus,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: widget.isPolling ? theme.colorScheme.primary : Colors.grey[400],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 20),
 
             // STAT 1: Today's Hydration Progress Card (Wave glass theme)
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surface.withOpacity(0.5),
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: Colors.white.withOpacity(0.04)),
+            LiquidGlass.withOwnLayer(
+              shape: const LiquidRoundedRectangle(borderRadius: 24),
+              settings: LiquidGlassSettings(
+                glassColor: theme.colorScheme.surface.withOpacity(0.6),
+                blur: 15,
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(Icons.today_rounded, size: 16, color: theme.colorScheme.primary),
-                          const SizedBox(width: 6),
-                          const Text(
-                            "Today's Hydration",
-                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                          ),
-                        ],
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.06),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          "${(progress * 100).toInt()}% Goal",
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                            color: theme.colorScheme.primary,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "$todayTotal ml",
-                            style: const TextStyle(
-                              fontSize: 32,
-                              fontWeight: FontWeight.w900,
-                              height: 1.1,
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: Colors.white.withOpacity(0.8)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.today_rounded, size: 16, color: theme.colorScheme.primary),
+                            const SizedBox(width: 6),
+                            const Text(
+                              "Today's Hydration",
+                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                             ),
+                          ],
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.06),
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            "Target: ${widget.dailyGoal} ml",
-                            style: TextStyle(fontSize: 13, color: Colors.grey[400]),
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            lastDrinkText,
+                          child: Text(
+                            "${(progress * 100).toInt()}% Goal",
                             style: TextStyle(
                               fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: theme.colorScheme.secondary,
+                              fontWeight: FontWeight.bold,
+                              color: theme.colorScheme.primary,
                             ),
                           ),
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.nfc_rounded,
-                                size: 12,
-                                color: Colors.grey[500]!.withOpacity(0.4),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "$todayTotal ml",
+                              style: const TextStyle(
+                                fontSize: 32,
+                                fontWeight: FontWeight.w900,
+                                height: 1.1,
                               ),
-                              const SizedBox(width: 4),
-                              Text(
-                                "Tap NFC tag to log",
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              "Target: ${widget.dailyGoal} ml",
+                              style: TextStyle(fontSize: 13, color: Colors.grey[400]),
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              lastDrinkText,
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: theme.colorScheme.secondary,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.nfc_rounded,
+                                  size: 12,
                                   color: Colors.grey[500]!.withOpacity(0.4),
                                 ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      // Styled mini fluid preview ring
-                      Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          SizedBox(
-                            width: 80,
-                            height: 80,
-                            child: CircularProgressIndicator(
-                              value: progress,
-                              strokeWidth: 6,
-                              backgroundColor: Colors.white.withOpacity(0.05),
-                              valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.primary),
+                                const SizedBox(width: 4),
+                                Text(
+                                  "Tap NFC tag to log",
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey[500]!.withOpacity(0.4),
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                          Icon(Icons.water_drop_rounded, color: theme.colorScheme.primary, size: 24),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
+                          ],
+                        ),
+                        // Styled mini fluid preview ring
+                        Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            SizedBox(
+                              width: 80,
+                              height: 80,
+                              child: CircularProgressIndicator(
+                                value: progress,
+                                strokeWidth: 6,
+                                backgroundColor: Colors.white.withOpacity(0.05),
+                                valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.primary),
+                              ),
+                            ),
+                            Icon(Icons.water_drop_rounded, color: theme.colorScheme.primary, size: 24),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 20),
 
             // STAT 2: Weekly / Monthly Hydration Stats Chart Card
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surface.withOpacity(0.3),
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: Colors.white.withOpacity(0.03)),
+            LiquidGlass.withOwnLayer(
+              shape: const LiquidRoundedRectangle(borderRadius: 24),
+              settings: LiquidGlassSettings(
+                glassColor: theme.colorScheme.surface.withOpacity(0.5),
+                blur: 12,
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        "Intake Overview",
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: Colors.white.withOpacity(0.7)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          "Intake Overview",
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      // Mini selector chip toggle
-                      Row(
-                        children: ['Week', 'Month'].map((tab) {
-                          final isSel = _selectedTab == tab;
-                          return GestureDetector(
-                            onTap: () => setState(() => _selectedTab = tab),
-                            child: Container(
-                              margin: const EdgeInsets.only(left: 8),
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: isSel ? theme.colorScheme.primary.withOpacity(0.12) : Colors.transparent,
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: isSel ? theme.colorScheme.primary.withOpacity(0.3) : Colors.transparent),
-                              ),
-                              child: Text(
-                                tab,
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
-                                  color: isSel ? theme.colorScheme.primary : Colors.grey[400],
+                        // Mini selector chip toggle
+                        Row(
+                          children: ['Week', 'Month'].map((tab) {
+                            final isSel = _selectedTab == tab;
+                            return GestureDetector(
+                              onTap: () => setState(() => _selectedTab = tab),
+                              child: Container(
+                                margin: const EdgeInsets.only(left: 8),
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: isSel ? theme.colorScheme.primary.withOpacity(0.12) : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(color: isSel ? theme.colorScheme.primary.withOpacity(0.3) : Colors.transparent),
+                                ),
+                                child: Text(
+                                  tab,
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                    color: isSel ? theme.colorScheme.primary : Colors.grey[400],
+                                  ),
                                 ),
                               ),
-                            ),
-                          );
-                        }).toList(),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  _buildStatsChart(theme),
-                ],
+                            );
+                          }).toList(),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    _buildStatsChart(theme),
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 24),
@@ -402,7 +421,7 @@ class _StatsPageState extends State<StatsPage> {
                   child: Container(
                     width: 14,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.04),
+                      color: theme.colorScheme.onSurface.withOpacity(0.05),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     alignment: Alignment.bottomCenter,
@@ -474,9 +493,9 @@ class _StatsPageState extends State<StatsPage> {
                 const SizedBox(height: 4),
                 Expanded(
                   child: Container(
-                    width: 18,
+                    width: 24,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.04),
+                      color: theme.colorScheme.onSurface.withOpacity(0.05),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     alignment: Alignment.bottomCenter,
@@ -511,68 +530,74 @@ class _StatsPageState extends State<StatsPage> {
     final label = drink['label'] as String;
     final volume = drink['volume'] as int;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface.withOpacity(0.4),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.02)),
+    return LiquidGlass.withOwnLayer(
+      shape: const LiquidRoundedRectangle(borderRadius: 20),
+      settings: LiquidGlassSettings(
+        glassColor: theme.colorScheme.surface.withOpacity(0.55),
+        blur: 8,
       ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
+      child: Container(
+        decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
-          onTap: () {
-            widget.onLogDrink(volume, type);
-            ScaffoldMessenger.of(context).hideCurrentSnackBar();
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Logged $volume ml of $label!'),
-                backgroundColor: color,
-                duration: const Duration(seconds: 1),
+          border: Border.all(color: Colors.white.withOpacity(0.8)),
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(20),
+            onTap: () {
+              widget.onLogDrink(volume, type);
+              ScaffoldMessenger.of(context).hideCurrentSnackBar();
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Logged $volume ml of $label!'),
+                  backgroundColor: color,
+                  duration: const Duration(seconds: 1),
+                ),
+              );
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: color.withOpacity(0.12),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(icon, color: color, size: 20),
+                      ),
+                      Icon(Icons.arrow_outward_rounded, color: Colors.grey[600], size: 16),
+                    ],
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "$volume ml",
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      Text(
+                        label,
+                        style: TextStyle(
+                          color: Colors.grey[500],
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-            );
-          },
-          child: Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: color.withOpacity(0.12),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(icon, color: color, size: 20),
-                    ),
-                    Icon(Icons.arrow_outward_rounded, color: Colors.grey[600], size: 16),
-                  ],
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "$volume ml",
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                    Text(
-                      label,
-                      style: TextStyle(
-                        color: Colors.grey[500],
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
             ),
           ),
         ),

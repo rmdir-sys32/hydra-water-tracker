@@ -37,6 +37,7 @@ dependencies:
   flutter_nfc_kit: ^3.6.2
   shared_preferences: ^2.5.5
   path_provider: ^2.1.5
+  liquid_glass_renderer: ^0.2.0-dev.4
 
 dev_dependencies:
   flutter_test:

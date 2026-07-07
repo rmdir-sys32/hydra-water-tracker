@@ -21,13 +21,13 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Hydrated',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData.dark().copyWith(
-        scaffoldBackgroundColor: const Color(0xFF0B132B), // Deep Ocean Blue
-        colorScheme: const ColorScheme.dark(
-          primary: Color(0xFF38BDF8),   // Sky/Water Blue
-          secondary: Color(0xFF0EA5E9), // Ocean Blue
-          surface: Color(0xFF1C2541),   // Midnight Navy
-          onSurface: Colors.white,
+      theme: ThemeData.light().copyWith(
+        scaffoldBackgroundColor: const Color(0xFFF1F5F9), // Soft Slate Gray
+        colorScheme: const ColorScheme.light(
+          primary: Color(0xFF0D9488),   // Soft Fresh Teal/Water
+          secondary: Color(0xFF3B82F6), // Clean Water Blue
+          surface: Colors.white,        // White surfaces for glassmorphism
+          onSurface: Color(0xFF0F172A), // Dark slate text
         ),
       ),
       home: const WaterTrackerPage(),
@@ -373,7 +373,7 @@ class _WaterTrackerPageState extends State<WaterTrackerPage> with WidgetsBinding
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           border: Border(
-            top: BorderSide(color: Colors.white.withOpacity(0.05), width: 1),
+            top: BorderSide(color: Colors.black.withOpacity(0.05), width: 1),
           ),
         ),
         child: BottomNavigationBar(
@@ -384,7 +384,7 @@ class _WaterTrackerPageState extends State<WaterTrackerPage> with WidgetsBinding
             });
           },
           type: BottomNavigationBarType.fixed,
-          backgroundColor: const Color(0xFF0B132B),
+          backgroundColor: theme.colorScheme.surface,
           selectedItemColor: theme.colorScheme.primary,
           unselectedItemColor: Colors.grey[500],
           showSelectedLabels: true,

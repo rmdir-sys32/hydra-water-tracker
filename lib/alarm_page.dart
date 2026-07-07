@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:liquid_glass_renderer/liquid_glass_renderer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AlarmPage extends StatefulWidget {
@@ -97,53 +98,58 @@ class _AlarmPageState extends State<AlarmPage> {
             ),
             const SizedBox(height: 24),
 
-            // Master Switch Card
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surface.withOpacity(0.5),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.white.withOpacity(0.04)),
+            LiquidGlass.withOwnLayer(
+              shape: const LiquidRoundedRectangle(borderRadius: 20),
+              settings: LiquidGlassSettings(
+                glassColor: theme.colorScheme.surface.withOpacity(0.6),
+                blur: 12,
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.primary.withOpacity(0.1),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.notifications_active_rounded,
-                          color: theme.colorScheme.primary,
-                          size: 20,
-                        ),
-                      ),
-                      const SizedBox(width: 14),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            "Smart Reminders",
-                            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Colors.white.withOpacity(0.8)),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.primary.withOpacity(0.1),
+                            shape: BoxShape.circle,
                           ),
-                          Text(
-                            "Alert me to drink water",
-                            style: TextStyle(fontSize: 12, color: Colors.grey[400]),
+                          child: Icon(
+                            Icons.notifications_active_rounded,
+                            color: theme.colorScheme.primary,
+                            size: 20,
                           ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  Switch(
-                    value: _remindersEnabled,
-                    onChanged: _toggleReminders,
-                    activeColor: theme.colorScheme.primary,
-                  ),
-                ],
+                        ),
+                        const SizedBox(width: 14),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              "Smart Reminders",
+                              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                            ),
+                            Text(
+                              "Alert me to drink water",
+                              style: TextStyle(fontSize: 12, color: Colors.grey[400]),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    Switch(
+                      value: _remindersEnabled,
+                      onChanged: _toggleReminders,
+                      activeColor: theme.colorScheme.primary,
+                    ),
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 20),
@@ -194,43 +200,49 @@ class _AlarmPageState extends State<AlarmPage> {
                 style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 10),
-              Container(
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surface.withOpacity(0.4),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.white.withOpacity(0.02)),
+              LiquidGlass.withOwnLayer(
+                shape: const LiquidRoundedRectangle(borderRadius: 20),
+                settings: LiquidGlassSettings(
+                  glassColor: theme.colorScheme.surface.withOpacity(0.5),
+                  blur: 10,
                 ),
-                child: ListView.separated(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: _fixedReminders.length,
-                  separatorBuilder: (context, index) => const Divider(height: 1, color: Colors.white10),
-                  itemBuilder: (context, index) {
-                    final item = _fixedReminders[index];
-                    final bool isEnabled = item['enabled'] as bool;
-                    final String timeStr = item['time'] as String;
-
-                    return ListTile(
-                      leading: Icon(
-                        Icons.access_time_filled_rounded,
-                        color: isEnabled ? theme.colorScheme.primary.withOpacity(0.8) : Colors.grey[600],
-                        size: 20,
-                      ),
-                      title: Text(
-                        timeStr,
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          color: isEnabled ? Colors.white : Colors.grey[600],
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: Colors.white.withOpacity(0.7)),
+                  ),
+                  child: ListView.separated(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: _fixedReminders.length,
+                    separatorBuilder: (context, index) => Divider(height: 1, color: Colors.black.withOpacity(0.05)),
+                    itemBuilder: (context, index) {
+                      final item = _fixedReminders[index];
+                      final bool isEnabled = item['enabled'] as bool;
+                      final String timeStr = item['time'] as String;
+  
+                      return ListTile(
+                        leading: Icon(
+                          Icons.access_time_filled_rounded,
+                          color: isEnabled ? theme.colorScheme.primary.withOpacity(0.8) : Colors.grey[400],
+                          size: 20,
                         ),
-                      ),
-                      trailing: Switch(
-                        value: isEnabled,
-                        onChanged: (val) => _toggleSingleReminder(index, val),
-                        activeColor: theme.colorScheme.primary,
-                      ),
-                    );
-                  },
+                        title: Text(
+                          timeStr,
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            color: isEnabled ? theme.colorScheme.onSurface : Colors.grey[500],
+                          ),
+                        ),
+                        trailing: Switch(
+                          value: isEnabled,
+                          onChanged: (val) => _toggleSingleReminder(index, val),
+                          activeColor: theme.colorScheme.primary,
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ),
             ] else ...[
