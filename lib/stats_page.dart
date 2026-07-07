@@ -115,51 +115,7 @@ class _StatsPageState extends State<StatsPage> {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
 
-            // NFC Status Banner
-            LiquidGlass.withOwnLayer(
-              shape: const LiquidRoundedRectangle(borderRadius: 14),
-              settings: LiquidGlassSettings(
-                glassColor: widget.isPolling ? theme.colorScheme.primary.withOpacity(isLight ? 0.1 : 0.08) : theme.colorScheme.surface.withOpacity(isLight ? 0.65 : 0.4),
-                blur: 10,
-              ),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(14),
-                  border: widget.isPolling
-                      ? Border.all(color: theme.colorScheme.primary.withOpacity(0.3))
-                      : null,
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: !widget.nfcAvailable 
-                            ? Colors.red 
-                            : (widget.isPolling ? theme.colorScheme.primary : Colors.grey),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        widget.nfcStatus,
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: widget.isPolling ? theme.colorScheme.primary : Colors.grey[400],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
 
             // STAT 1: Today's Hydration Progress Card (Wave glass theme)
             LiquidGlass.withOwnLayer(

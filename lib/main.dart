@@ -411,7 +411,38 @@ class _WaterTrackerPageState extends State<WaterTrackerPage> with WidgetsBinding
     }
 
     return Scaffold(
-      body: SafeArea(child: currentBody),
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(child: currentBody),
+            Opacity(
+              opacity: 0.5,
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 12.0, left: 16.0, right: 16.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.nfc_rounded,
+                      size: 14,
+                      color: _isPolling ? theme.colorScheme.primary : Colors.grey,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      _status,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: theme.brightness == Brightness.light ? Colors.grey[700] : Colors.grey[300],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
       bottomNavigationBar: BottomNavigationBar(
           currentIndex: _currentIndex,
           onTap: (index) {
