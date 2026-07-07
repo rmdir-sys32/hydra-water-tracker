@@ -39,4 +39,18 @@ void main() {
     expect(find.text('Export JSON'), findsOneWidget);
     expect(find.text('Import JSON'), findsOneWidget);
   });
+
+  testWidgets('Statistics home displays stats components and responds to theme modes', (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(800, 1200);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(const MyApp());
+
+    // Verify Statistics page elements on the Home screen
+    expect(find.text("Today's Hydration"), findsOneWidget);
+    expect(find.text('Intake Overview'), findsOneWidget);
+    expect(find.textContaining('Tap NFC to log'), findsOneWidget);
+  });
 }

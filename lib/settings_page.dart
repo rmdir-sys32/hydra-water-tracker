@@ -3,12 +3,14 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:liquid_glass_renderer/liquid_glass_renderer.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'main.dart';
 
 class SettingsPage extends StatefulWidget {
-  const SettingsPage({super.key});
+  final VoidCallback? onSettingsChanged;
+  const SettingsPage({super.key, this.onSettingsChanged});
 
   @override
   State<SettingsPage> createState() => _SettingsPageState();
@@ -19,6 +21,7 @@ class _SettingsPageState extends State<SettingsPage> {
   int _defaultVolume = 250;
   String _activePreset = '250';
   int _dailyGoal = 2000;
+  String _themeMode = 'light';
 
   final TextEditingController _volumeController = TextEditingController();
   final TextEditingController _goalController = TextEditingController();
@@ -49,6 +52,8 @@ class _SettingsPageState extends State<SettingsPage> {
 
       _dailyGoal = _prefs?.getInt('daily_goal') ?? 2000;
       _goalController.text = _dailyGoal.toString();
+
+      _themeMode = _prefs?.getString('theme_mode') ?? 'light';
     });
   }
 
@@ -109,6 +114,7 @@ class _SettingsPageState extends State<SettingsPage> {
       // Write to file
       final file = await _localFile;
       await file.writeAsString(jsonString);
+      widget.onSettingsChanged?.call();
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -207,6 +213,7 @@ class _SettingsPageState extends State<SettingsPage> {
       setState(() {
         _confirmReset = false;
       });
+      widget.onSettingsChanged?.call();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -230,6 +237,7 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget _buildPresetChip(String label, String valueKey, int targetMl) {
     final theme = Theme.of(context);
     final isSelected = _activePreset == valueKey;
+    final isLight = theme.brightness == Brightness.light;
     return ChoiceChip(
       label: Text(label),
       selected: isSelected,
@@ -246,20 +254,55 @@ class _SettingsPageState extends State<SettingsPage> {
           if (targetMl > 0) {
             _prefs?.setInt('default_volume', targetMl);
           }
+          widget.onSettingsChanged?.call();
         }
       },
       selectedColor: theme.colorScheme.primary.withOpacity(0.18),
       checkmarkColor: theme.colorScheme.primary,
       labelStyle: TextStyle(
-        color: isSelected ? theme.colorScheme.primary : Colors.grey[400],
+        color: isSelected ? theme.colorScheme.primary : (isLight ? Colors.grey[600] : Colors.grey[400]),
         fontWeight: FontWeight.bold,
         fontSize: 13,
       ),
-      backgroundColor: Colors.white.withOpacity(0.03),
+      backgroundColor: theme.colorScheme.onSurface.withOpacity(0.03),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
-          color: isSelected ? theme.colorScheme.primary.withOpacity(0.4) : Colors.white10,
+          color: isSelected ? theme.colorScheme.primary.withOpacity(0.4) : (isLight ? Colors.black.withOpacity(0.05) : Colors.white10),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildThemeChip(String label, String valueKey, ThemeMode mode) {
+    final theme = Theme.of(context);
+    final isSelected = _themeMode == valueKey;
+    final isLight = theme.brightness == Brightness.light;
+    return ChoiceChip(
+      label: Text(label),
+      selected: isSelected,
+      onSelected: (selected) {
+        if (selected) {
+          setState(() {
+            _themeMode = valueKey;
+          });
+          _prefs?.setString('theme_mode', valueKey);
+          MyApp.themeNotifier.value = mode;
+          widget.onSettingsChanged?.call();
+        }
+      },
+      selectedColor: theme.colorScheme.primary.withOpacity(0.18),
+      checkmarkColor: theme.colorScheme.primary,
+      labelStyle: TextStyle(
+        color: isSelected ? theme.colorScheme.primary : (isLight ? Colors.grey[600] : Colors.grey[400]),
+        fontWeight: FontWeight.bold,
+        fontSize: 13,
+      ),
+      backgroundColor: theme.colorScheme.onSurface.withOpacity(0.03),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: isSelected ? theme.colorScheme.primary.withOpacity(0.4) : (isLight ? Colors.black.withOpacity(0.05) : Colors.white10),
         ),
       ),
     );
@@ -268,6 +311,7 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isLight = theme.brightness == Brightness.light;
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -281,181 +325,107 @@ class _SettingsPageState extends State<SettingsPage> {
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
           children: [
-            // Daily Goal Editor Card
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surface.withOpacity(0.4),
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: Colors.white.withOpacity(0.02)),
+            // App Theme Card
+            LiquidGlass.withOwnLayer(
+              shape: const LiquidRoundedRectangle(borderRadius: 14),
+              settings: LiquidGlassSettings(
+                glassColor: theme.colorScheme.surface.withOpacity(isLight ? 0.55 : 0.35),
+                blur: 10,
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(Icons.flag_rounded, size: 18, color: Colors.grey[400]),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Daily Goal',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[300],
-                          fontWeight: FontWeight.w600,
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: isLight ? Colors.white.withOpacity(0.8) : Colors.white.withOpacity(0.08)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.palette_rounded, size: 18, color: isLight ? Colors.grey[600] : Colors.grey[400]),
+                        const SizedBox(width: 8),
+                         Text(
+                          'App Theme',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: theme.colorScheme.onSurface,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Adjust Target:',
-                        style: TextStyle(fontSize: 13, color: Colors.grey[400]),
-                      ),
-                      Row(
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.remove_circle_outline_rounded, size: 22),
-                            onPressed: () {
-                              if (_dailyGoal > 500) {
-                                setState(() {
-                                  _dailyGoal -= 250;
-                                  _goalController.text = _dailyGoal.toString();
-                                });
-                                _prefs?.setInt('daily_goal', _dailyGoal);
-                              }
-                            },
-                            color: theme.colorScheme.primary,
-                          ),
-                          const SizedBox(width: 6),
-                          SizedBox(
-                            width: 70,
-                            height: 36,
-                            child: TextField(
-                              controller: _goalController,
-                              keyboardType: TextInputType.number,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              decoration: InputDecoration(
-                                contentPadding: EdgeInsets.zero,
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                  borderSide: const BorderSide(color: Colors.white10),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                  borderSide: BorderSide(color: theme.colorScheme.primary),
-                                ),
-                                filled: true,
-                                fillColor: Colors.black26,
-                              ),
-                              onChanged: (text) {
-                                int? val = int.tryParse(text);
-                                if (val != null && val > 0) {
-                                  setState(() {
-                                    _dailyGoal = val;
-                                  });
-                                  _prefs?.setInt('daily_goal', val);
-                                }
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: 6),
-                          IconButton(
-                            icon: const Icon(Icons.add_circle_outline_rounded, size: 22),
-                            onPressed: () {
-                              setState(() {
-                                _dailyGoal += 250;
-                                _goalController.text = _dailyGoal.toString();
-                              });
-                              _prefs?.setInt('daily_goal', _dailyGoal);
-                            },
-                            color: theme.colorScheme.primary,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'ml',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey[400],
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        _buildThemeChip('Light Mode', 'light', ThemeMode.light),
+                        _buildThemeChip('Dark Mode', 'dark', ThemeMode.dark),
+                        _buildThemeChip('System', 'system', ThemeMode.system),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 16),
 
-            // Tap Volume Presets Card
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surface.withOpacity(0.4),
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: Colors.white.withOpacity(0.02)),
+            // Daily Goal Editor Card
+            LiquidGlass.withOwnLayer(
+              shape: const LiquidRoundedRectangle(borderRadius: 14),
+              settings: LiquidGlassSettings(
+                glassColor: theme.colorScheme.surface.withOpacity(isLight ? 0.55 : 0.35),
+                blur: 10,
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(Icons.tune_rounded, size: 18, color: Colors.grey[400]),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Tap Volume',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[300],
-                          fontWeight: FontWeight.w600,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: isLight ? Colors.white.withOpacity(0.8) : Colors.white.withOpacity(0.08)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.flag_rounded, size: 18, color: isLight ? Colors.grey[700] : Colors.grey[300]),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Daily Goal',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: theme.colorScheme.onSurface,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      _buildPresetChip('250ml', '250', 250),
-                      _buildPresetChip('500ml', '500', 500),
-                      _buildPresetChip('1L', '1000', 1000),
-                      _buildPresetChip('Custom', 'Custom', 0),
-                    ],
-                  ),
-                  if (_activePreset == 'Custom') ...[
-                    const SizedBox(height: 16),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Custom size:',
+                          'Adjust Target:',
                           style: TextStyle(
                             fontSize: 13,
-                            color: Colors.grey[400],
+                            color: theme.colorScheme.onSurface,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                         Row(
                           children: [
                             IconButton(
-                              icon: const Icon(Icons.remove_circle_outline_rounded, size: 20),
+                              icon: const Icon(Icons.remove_circle_outline_rounded, size: 22),
                               onPressed: () {
-                                int val = int.tryParse(_volumeController.text) ?? 250;
-                                if (val > 50) {
-                                  val -= 50;
-                                  setState(() {
-                                    _defaultVolume = val;
-                                    _volumeController.text = val.toString();
-                                  });
-                                  _prefs?.setInt('default_volume', val);
-                                }
+                                  if (_dailyGoal > 500) {
+                                    setState(() {
+                                      _dailyGoal -= 250;
+                                      _goalController.text = _dailyGoal.toString();
+                                    });
+                                    _prefs?.setInt('daily_goal', _dailyGoal);
+                                    widget.onSettingsChanged?.call();
+                                  }
                               },
                               color: theme.colorScheme.primary,
                             ),
@@ -464,7 +434,7 @@ class _SettingsPageState extends State<SettingsPage> {
                               width: 70,
                               height: 36,
                               child: TextField(
-                                controller: _volumeController,
+                                controller: _goalController,
                                 keyboardType: TextInputType.number,
                                 textAlign: TextAlign.center,
                                 style: const TextStyle(
@@ -475,37 +445,37 @@ class _SettingsPageState extends State<SettingsPage> {
                                   contentPadding: EdgeInsets.zero,
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(8),
-                                    borderSide: const BorderSide(color: Colors.white10),
+                                    borderSide: BorderSide(color: theme.colorScheme.onSurface.withOpacity(0.1)),
                                   ),
                                   focusedBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(8),
                                     borderSide: BorderSide(color: theme.colorScheme.primary),
                                   ),
                                   filled: true,
-                                  fillColor: Colors.black26,
+                                  fillColor: theme.colorScheme.onSurface.withOpacity(0.05),
                                 ),
                                 onChanged: (text) {
                                   int? val = int.tryParse(text);
                                   if (val != null && val > 0) {
                                     setState(() {
-                                      _defaultVolume = val;
+                                      _dailyGoal = val;
                                     });
-                                    _prefs?.setInt('default_volume', val);
+                                    _prefs?.setInt('daily_goal', val);
+                                    widget.onSettingsChanged?.call();
                                   }
                                 },
                               ),
                             ),
                             const SizedBox(width: 6),
                             IconButton(
-                              icon: const Icon(Icons.add_circle_outline_rounded, size: 20),
+                              icon: const Icon(Icons.add_circle_outline_rounded, size: 22),
                               onPressed: () {
-                                int val = int.tryParse(_volumeController.text) ?? 250;
-                                val += 50;
                                 setState(() {
-                                  _defaultVolume = val;
-                                  _volumeController.text = val.toString();
+                                  _dailyGoal += 250;
+                                  _goalController.text = _dailyGoal.toString();
                                 });
-                                _prefs?.setInt('default_volume', val);
+                                _prefs?.setInt('daily_goal', _dailyGoal);
+                                widget.onSettingsChanged?.call();
                               },
                               color: theme.colorScheme.primary,
                             ),
@@ -513,9 +483,9 @@ class _SettingsPageState extends State<SettingsPage> {
                             Text(
                               'ml',
                               style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey[400],
-                                fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                  color: theme.colorScheme.onSurface,
+                                  fontWeight: FontWeight.w600,
                               ),
                             ),
                           ],
@@ -523,82 +493,232 @@ class _SettingsPageState extends State<SettingsPage> {
                       ],
                     ),
                   ],
-                ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Tap Volume Presets Card
+            LiquidGlass.withOwnLayer(
+              shape: const LiquidRoundedRectangle(borderRadius: 14),
+              settings: LiquidGlassSettings(
+                glassColor: theme.colorScheme.surface.withOpacity(isLight ? 0.55 : 0.35),
+                blur: 10,
+              ),
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: isLight ? Colors.white.withOpacity(0.8) : Colors.white.withOpacity(0.08)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.tune_rounded, size: 18, color: isLight ? Colors.grey[700] : Colors.grey[300]),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Tap Volume',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: theme.colorScheme.onSurface,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        _buildPresetChip('250ml', '250', 250),
+                        _buildPresetChip('500ml', '500', 500),
+                        _buildPresetChip('1L', '1000', 1000),
+                        _buildPresetChip('Custom', 'Custom', 0),
+                      ],
+                    ),
+                    if (_activePreset == 'Custom') ...[
+                      const SizedBox(height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Custom size:',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: theme.colorScheme.onSurface,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          Row(
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.remove_circle_outline_rounded, size: 20),
+                                onPressed: () {
+                                  int val = int.tryParse(_volumeController.text) ?? 250;
+                                  if (val > 50) {
+                                    val -= 50;
+                                    setState(() {
+                                      _defaultVolume = val;
+                                      _volumeController.text = val.toString();
+                                    });
+                                    _prefs?.setInt('default_volume', val);
+                                    widget.onSettingsChanged?.call();
+                                  }
+                                },
+                                color: theme.colorScheme.primary,
+                              ),
+                              const SizedBox(width: 6),
+                              SizedBox(
+                                width: 70,
+                                height: 36,
+                                child: TextField(
+                                  controller: _volumeController,
+                                  keyboardType: TextInputType.number,
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  decoration: InputDecoration(
+                                    contentPadding: EdgeInsets.zero,
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                      borderSide: BorderSide(color: theme.colorScheme.onSurface.withOpacity(0.1)),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                      borderSide: BorderSide(color: theme.colorScheme.primary),
+                                    ),
+                                    filled: true,
+                                    fillColor: theme.colorScheme.onSurface.withOpacity(0.05),
+                                  ),
+                                  onChanged: (text) {
+                                    int? val = int.tryParse(text);
+                                    if (val != null && val > 0) {
+                                      setState(() {
+                                        _defaultVolume = val;
+                                      });
+                                      _prefs?.setInt('default_volume', val);
+                                      widget.onSettingsChanged?.call();
+                                    }
+                                  },
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              IconButton(
+                                icon: const Icon(Icons.add_circle_outline_rounded, size: 20),
+                                onPressed: () {
+                                  int val = int.tryParse(_volumeController.text) ?? 250;
+                                  val += 50;
+                                  setState(() {
+                                    _defaultVolume = val;
+                                    _volumeController.text = val.toString();
+                                  });
+                                  _prefs?.setInt('default_volume', val);
+                                  widget.onSettingsChanged?.call();
+                                },
+                                color: theme.colorScheme.primary,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'ml',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: theme.colorScheme.onSurface,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 16),
 
             // Backup & Restore Card
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surface.withOpacity(0.4),
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: Colors.white.withOpacity(0.02)),
+            LiquidGlass.withOwnLayer(
+              shape: const LiquidRoundedRectangle(borderRadius: 14),
+              settings: LiquidGlassSettings(
+                glassColor: theme.colorScheme.surface.withOpacity(isLight ? 0.55 : 0.35),
+                blur: 10,
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(Icons.save_rounded, size: 18, color: Colors.grey[400]),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Data Backup & Restore',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[300],
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Export your local water logs JSON to your clipboard or import a backup string.',
-                    style: TextStyle(fontSize: 12, color: Colors.grey[500]),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: _exportLogs,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
-                            foregroundColor: theme.colorScheme.primary,
-                            elevation: 0,
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              side: BorderSide(color: theme.colorScheme.primary.withOpacity(0.2)),
-                            ),
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: isLight ? Colors.white.withOpacity(0.8) : Colors.white.withOpacity(0.08)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.save_rounded, size: 18, color: isLight ? Colors.grey[700] : Colors.grey[300]),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Data Backup & Restore',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: theme.colorScheme.onSurface,
+                            fontWeight: FontWeight.w700,
                           ),
-                          icon: const Icon(Icons.copy_all_rounded, size: 18),
-                          label: const Text('Export JSON'),
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: _showImportDialog,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: theme.colorScheme.secondary.withOpacity(0.1),
-                            foregroundColor: theme.colorScheme.secondary,
-                            elevation: 0,
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              side: BorderSide(color: theme.colorScheme.secondary.withOpacity(0.2)),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Export your local water logs JSON to your clipboard or import a backup string.',
+                      style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurface),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: _exportLogs,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
+                              foregroundColor: theme.colorScheme.primary,
+                              elevation: 0,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                side: BorderSide(color: theme.colorScheme.primary.withOpacity(0.2)),
+                              ),
                             ),
+                            icon: const Icon(Icons.copy_all_rounded, size: 18),
+                            label: const Text('Export JSON'),
                           ),
-                          icon: const Icon(Icons.install_mobile_rounded, size: 18),
-                          label: const Text('Import JSON'),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: _showImportDialog,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: theme.colorScheme.secondary.withOpacity(0.1),
+                              foregroundColor: theme.colorScheme.secondary,
+                              elevation: 0,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                side: BorderSide(color: theme.colorScheme.secondary.withOpacity(0.2)),
+                              ),
+                            ),
+                            icon: const Icon(Icons.install_mobile_rounded, size: 18),
+                            label: const Text('Import JSON'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 24),
@@ -608,9 +728,9 @@ class _SettingsPageState extends State<SettingsPage> {
               child: OutlinedButton.icon(
                 onPressed: _handleReset,
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: _confirmReset ? Colors.redAccent : Colors.grey[500],
+                  foregroundColor: _confirmReset ? Colors.redAccent : (isLight ? Colors.grey[700] : Colors.grey[400]),
                   side: BorderSide(
-                    color: _confirmReset ? Colors.redAccent.withOpacity(0.5) : Colors.white10,
+                    color: _confirmReset ? Colors.redAccent.withOpacity(0.5) : (isLight ? Colors.black.withOpacity(0.1) : Colors.white10),
                   ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
