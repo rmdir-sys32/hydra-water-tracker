@@ -221,6 +221,25 @@ class _StatsPageState extends State<StatsPage> {
                               color: theme.colorScheme.secondary,
                             ),
                           ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.nfc_rounded,
+                                size: 12,
+                                color: Colors.grey[500]!.withOpacity(0.4),
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                "Tap NFC tag to log",
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey[500]!.withOpacity(0.4),
+                                ),
+                              ),
+                            ],
+                          ),
                         ],
                       ),
                       // Styled mini fluid preview ring
