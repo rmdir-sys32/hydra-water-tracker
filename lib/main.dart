@@ -451,7 +451,8 @@ class _WaterTrackerPageState extends State<WaterTrackerPage> with WidgetsBinding
             });
           },
           type: BottomNavigationBarType.fixed,
-          backgroundColor: theme.colorScheme.surface,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
           selectedItemColor: theme.colorScheme.primary,
           unselectedItemColor: Colors.grey[500],
           showSelectedLabels: true,

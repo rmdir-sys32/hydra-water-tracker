@@ -244,7 +244,7 @@ class _StatsPageState extends State<StatsPage> {
             LiquidGlass.withOwnLayer(
               shape: const LiquidRoundedRectangle(borderRadius: 24),
               settings: LiquidGlassSettings(
-                glassColor: theme.colorScheme.surface.withOpacity(0.5),
+                glassColor: theme.colorScheme.surface.withOpacity(isLight ? 0.5 : 0.35),
                 blur: 12,
               ),
               child: Container(
@@ -545,7 +545,7 @@ class _StatsPageState extends State<StatsPage> {
     return LiquidGlass.withOwnLayer(
       shape: const LiquidRoundedRectangle(borderRadius: 20),
       settings: LiquidGlassSettings(
-        glassColor: theme.colorScheme.surface.withOpacity(0.55),
+        glassColor: theme.colorScheme.surface.withOpacity(theme.brightness == Brightness.light ? 0.55 : 0.35),
         blur: 8,
       ),
       child: Container(

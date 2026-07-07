@@ -67,6 +67,7 @@ class _AlarmPageState extends State<AlarmPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isLight = theme.brightness == Brightness.light;
 
     return Scaffold(
       body: SafeArea(
@@ -101,7 +102,7 @@ class _AlarmPageState extends State<AlarmPage> {
             LiquidGlass.withOwnLayer(
               shape: const LiquidRoundedRectangle(borderRadius: 20),
               settings: LiquidGlassSettings(
-                glassColor: theme.colorScheme.surface.withOpacity(0.6),
+                glassColor: theme.colorScheme.surface.withOpacity(isLight ? 0.6 : 0.35),
                 blur: 12,
               ),
               child: Container(
@@ -199,7 +200,7 @@ class _AlarmPageState extends State<AlarmPage> {
               LiquidGlass.withOwnLayer(
                 shape: const LiquidRoundedRectangle(borderRadius: 20),
                 settings: LiquidGlassSettings(
-                  glassColor: theme.colorScheme.surface.withOpacity(0.5),
+                  glassColor: theme.colorScheme.surface.withOpacity(isLight ? 0.5 : 0.35),
                   blur: 10,
                 ),
                 child: Container(
@@ -210,7 +211,10 @@ class _AlarmPageState extends State<AlarmPage> {
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: _fixedReminders.length,
-                    separatorBuilder: (context, index) => Divider(height: 1, color: Colors.black.withOpacity(0.05)),
+                    separatorBuilder: (context, index) => Divider(
+                      height: 1,
+                      color: isLight ? Colors.black.withOpacity(0.05) : Colors.white.withOpacity(0.05),
+                    ),
                     itemBuilder: (context, index) {
                       final item = _fixedReminders[index];
                       final bool isEnabled = item['enabled'] as bool;
