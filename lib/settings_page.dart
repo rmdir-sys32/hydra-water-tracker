@@ -8,7 +8,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'main.dart';
 
 class SettingsPage extends StatefulWidget {
-  const SettingsPage({super.key});
+  final VoidCallback? onSettingsChanged;
+  const SettingsPage({super.key, this.onSettingsChanged});
 
   @override
   State<SettingsPage> createState() => _SettingsPageState();
@@ -109,6 +110,7 @@ class _SettingsPageState extends State<SettingsPage> {
       // Write to file
       final file = await _localFile;
       await file.writeAsString(jsonString);
+      widget.onSettingsChanged?.call();
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -207,6 +209,7 @@ class _SettingsPageState extends State<SettingsPage> {
       setState(() {
         _confirmReset = false;
       });
+      widget.onSettingsChanged?.call();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -246,6 +249,7 @@ class _SettingsPageState extends State<SettingsPage> {
           if (targetMl > 0) {
             _prefs?.setInt('default_volume', targetMl);
           }
+          widget.onSettingsChanged?.call();
         }
       },
       selectedColor: theme.colorScheme.primary.withOpacity(0.18),
@@ -319,13 +323,14 @@ class _SettingsPageState extends State<SettingsPage> {
                           IconButton(
                             icon: const Icon(Icons.remove_circle_outline_rounded, size: 22),
                             onPressed: () {
-                              if (_dailyGoal > 500) {
-                                setState(() {
-                                  _dailyGoal -= 250;
-                                  _goalController.text = _dailyGoal.toString();
-                                });
-                                _prefs?.setInt('daily_goal', _dailyGoal);
-                              }
+                                if (_dailyGoal > 500) {
+                                  setState(() {
+                                    _dailyGoal -= 250;
+                                    _goalController.text = _dailyGoal.toString();
+                                  });
+                                  _prefs?.setInt('daily_goal', _dailyGoal);
+                                  widget.onSettingsChanged?.call();
+                                }
                             },
                             color: theme.colorScheme.primary,
                           ),
@@ -361,6 +366,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                     _dailyGoal = val;
                                   });
                                   _prefs?.setInt('daily_goal', val);
+                                  widget.onSettingsChanged?.call();
                                 }
                               },
                             ),
@@ -374,6 +380,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                 _goalController.text = _dailyGoal.toString();
                               });
                               _prefs?.setInt('daily_goal', _dailyGoal);
+                              widget.onSettingsChanged?.call();
                             },
                             color: theme.colorScheme.primary,
                           ),
@@ -455,6 +462,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                     _volumeController.text = val.toString();
                                   });
                                   _prefs?.setInt('default_volume', val);
+                                  widget.onSettingsChanged?.call();
                                 }
                               },
                               color: theme.colorScheme.primary,
@@ -491,6 +499,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                       _defaultVolume = val;
                                     });
                                     _prefs?.setInt('default_volume', val);
+                                    widget.onSettingsChanged?.call();
                                   }
                                 },
                               ),
@@ -506,6 +515,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                   _volumeController.text = val.toString();
                                 });
                                 _prefs?.setInt('default_volume', val);
+                                widget.onSettingsChanged?.call();
                               },
                               color: theme.colorScheme.primary,
                             ),

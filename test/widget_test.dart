@@ -39,4 +39,39 @@ void main() {
     expect(find.text('Export JSON'), findsOneWidget);
     expect(find.text('Import JSON'), findsOneWidget);
   });
+
+  testWidgets('Navigating to statistics page displays stats components and allows logging drink types', (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(800, 1200);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(const MyApp());
+
+    // Tap on statistics icon button in BottomNavigationBar
+    await tester.tap(find.byIcon(Icons.bar_chart_rounded));
+    await tester.pumpAndSettle();
+
+    // Verify Statistics page has loaded
+    expect(find.text('Select Drink'), findsOneWidget);
+    expect(find.text('Hydration Stats'), findsOneWidget);
+    expect(find.text('Quick Logs By Drink Type'), findsOneWidget);
+
+    // Verify drink category quick logs cards exist
+    expect(find.text('Water'), findsOneWidget);
+    expect(find.text('Smoothie'), findsOneWidget);
+    expect(find.text('Tea'), findsOneWidget);
+    expect(find.text('Juice'), findsOneWidget);
+
+    // Scroll ListView to bring drink cards into view
+    await tester.drag(find.byType(ListView), const Offset(0, -400));
+    await tester.pumpAndSettle();
+
+    // Tap on 'Tea' quick log card
+    await tester.tap(find.text('Tea'));
+    await tester.pump();
+
+    // Verify snackbar is displayed
+    expect(find.text('Logged 200 ml of Tea!'), findsOneWidget);
+  });
 }

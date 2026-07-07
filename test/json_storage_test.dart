@@ -7,15 +7,17 @@ void main() {
   group('WaterLogEntry Serialization', () {
     test('toJson and fromJson work correctly', () {
       final now = DateTime.now();
-      final entry = WaterLogEntry(timestamp: now, volumeMl: 250);
+      final entry = WaterLogEntry(timestamp: now, volumeMl: 250, type: 'tea');
 
       final jsonMap = entry.toJson();
       expect(jsonMap['timestamp'], now.toIso8601String());
       expect(jsonMap['volumeMl'], 250);
+      expect(jsonMap['type'], 'tea');
 
       final decodedEntry = WaterLogEntry.fromJson(jsonMap);
       expect(decodedEntry.timestamp, now);
       expect(decodedEntry.volumeMl, 250);
+      expect(decodedEntry.type, 'tea');
     });
 
     test('backward compatibility fromSharedPrefString works correctly', () {
