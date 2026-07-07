@@ -2,6 +2,14 @@
 
 A lightweight, elegant, offline-first Flutter application for tracking daily water intake via NFC tags or manual logging.
 
+## Screenshots
+
+<p align="center">
+  <img src="1.jpeg" width="320" alt="Hydrated Dashboard" />
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="2.jpeg" width="320" alt="Hydrated Settings" />
+</p>
+
 ## Features
 - **NFC Tag Integration**: Tap a pre-configured NFC sticker on your cup or bottle to instantly log a drink.
 - **Dedicated Settings Screen**: Access preferences in a clean, secondary view to manage daily goals and custom tap volumes.
