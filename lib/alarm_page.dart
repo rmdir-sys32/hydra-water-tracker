@@ -104,6 +104,8 @@ class _AlarmPageState extends State<AlarmPage> {
               settings: LiquidGlassSettings(
                 glassColor: theme.colorScheme.surface.withOpacity(isLight ? 0.6 : 0.35),
                 blur: 12,
+                thickness: 0,
+                lightIntensity: 0,
               ),
               child: Container(
                 padding: const EdgeInsets.all(16),
@@ -202,6 +204,8 @@ class _AlarmPageState extends State<AlarmPage> {
                 settings: LiquidGlassSettings(
                   glassColor: theme.colorScheme.surface.withOpacity(isLight ? 0.5 : 0.35),
                   blur: 10,
+                  thickness: 0,
+                  lightIntensity: 0,
                 ),
                 child: Container(
                   decoration: BoxDecoration(

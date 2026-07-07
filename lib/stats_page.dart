@@ -123,6 +123,8 @@ class _StatsPageState extends State<StatsPage> {
               settings: LiquidGlassSettings(
                 glassColor: theme.colorScheme.surface.withOpacity(theme.brightness == Brightness.light ? 0.6 : 0.45),
                 blur: 15,
+                thickness: 0,
+                lightIntensity: 0,
               ),
               child: Container(
                 padding: const EdgeInsets.all(24),
@@ -246,6 +248,8 @@ class _StatsPageState extends State<StatsPage> {
               settings: LiquidGlassSettings(
                 glassColor: theme.colorScheme.surface.withOpacity(isLight ? 0.5 : 0.35),
                 blur: 12,
+                thickness: 0,
+                lightIntensity: 0,
               ),
               child: Container(
                 padding: const EdgeInsets.all(20),
@@ -321,6 +325,8 @@ class _StatsPageState extends State<StatsPage> {
                 settings: LiquidGlassSettings(
                   glassColor: theme.colorScheme.surface.withOpacity(isLight ? 0.5 : 0.35),
                   blur: 10,
+                  thickness: 0,
+                  lightIntensity: 0,
                 ),
                 child: Container(
                   decoration: BoxDecoration(
@@ -544,6 +550,8 @@ class _StatsPageState extends State<StatsPage> {
       settings: LiquidGlassSettings(
         glassColor: theme.colorScheme.surface.withOpacity(theme.brightness == Brightness.light ? 0.55 : 0.35),
         blur: 8,
+        thickness: 0,
+        lightIntensity: 0,
       ),
       child: Container(
         decoration: BoxDecoration(

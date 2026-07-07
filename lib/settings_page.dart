@@ -330,6 +330,8 @@ class _SettingsPageState extends State<SettingsPage> {
               settings: LiquidGlassSettings(
                 glassColor: theme.colorScheme.surface.withOpacity(isLight ? 0.55 : 0.35),
                 blur: 10,
+                thickness: 0,
+                lightIntensity: 0,
               ),
               child: Container(
                 padding: const EdgeInsets.all(16),
@@ -375,6 +377,8 @@ class _SettingsPageState extends State<SettingsPage> {
               settings: LiquidGlassSettings(
                 glassColor: theme.colorScheme.surface.withOpacity(isLight ? 0.55 : 0.35),
                 blur: 10,
+                thickness: 0,
+                lightIntensity: 0,
               ),
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -501,6 +505,8 @@ class _SettingsPageState extends State<SettingsPage> {
               settings: LiquidGlassSettings(
                 glassColor: theme.colorScheme.surface.withOpacity(isLight ? 0.55 : 0.35),
                 blur: 10,
+                thickness: 0,
+                lightIntensity: 0,
               ),
               child: Container(
                 padding: const EdgeInsets.all(16),
@@ -644,6 +650,8 @@ class _SettingsPageState extends State<SettingsPage> {
               settings: LiquidGlassSettings(
                 glassColor: theme.colorScheme.surface.withOpacity(isLight ? 0.55 : 0.35),
                 blur: 10,
+                thickness: 0,
+                lightIntensity: 0,
               ),
               child: Container(
                 padding: const EdgeInsets.all(16),
