@@ -331,333 +331,26 @@ class _WaterTrackerPageState extends State<WaterTrackerPage> with WidgetsBinding
     return '$hour:$minute $ampm';
   }
 
-  Widget _buildHomeTab(BuildContext context, ThemeData theme, int todayTotal, List<WaterLogEntry> todayRecords, double progress) {
-    return Stack(
-      children: [
-        // Decorative background blurs
-        Positioned(
-          top: -100,
-          left: -50,
-          child: Container(
-            width: 300,
-            height: 300,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: theme.colorScheme.primary.withOpacity(0.06),
-                  blurRadius: 120,
-                  spreadRadius: 40,
-                ),
-              ],
-            ),
-          ),
-        ),
-
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // App Header
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.water_drop_rounded,
-                    size: 28,
-                    color: theme.colorScheme.primary,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Hydrated',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: -0.5,
-                      color: theme.colorScheme.onSurface,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-
-              // Circular Fluid Level Progress Circle (Interactive Tap)
-              GestureDetector(
-                onTap: () {
-                  _logWater(_defaultVolume);
-                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Logged $_defaultVolume ml manually'),
-                      duration: const Duration(seconds: 1),
-                      backgroundColor: theme.colorScheme.secondary,
-                    ),
-                  );
-                },
-                child: SizedBox(
-                  width: 200,
-                  height: 200,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      // Glow Radial Progress indicator
-                      SizedBox(
-                        width: 194,
-                        height: 194,
-                        child: CircularProgressIndicator(
-                          value: progress,
-                          strokeWidth: 8,
-                          backgroundColor: Colors.white.withOpacity(0.05),
-                          valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.primary),
-                        ),
-                      ),
-                      // Content Card Inside circle
-                      Container(
-                        width: 174,
-                        height: 174,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: theme.colorScheme.surface,
-                          boxShadow: [
-                            BoxShadow(
-                              color: theme.colorScheme.primary.withOpacity(_isPolling ? 0.12 : 0.02),
-                              blurRadius: 20,
-                              spreadRadius: 1,
-                            )
-                          ],
-                        ),
-                        alignment: Alignment.center,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              '$todayTotal',
-                              style: const TextStyle(
-                                fontSize: 44,
-                                fontWeight: FontWeight.w900,
-                                color: Colors.white,
-                                height: 1,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              '/ $_dailyGoal ml',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey[400],
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              _dailyGoal > 0 
-                                  ? '${(todayTotal / _dailyGoal * 100).toInt()}% goal'
-                                  : '0% goal',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: theme.colorScheme.primary,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              'TAP TO ADD',
-                              style: TextStyle(
-                                fontSize: 9,
-                                color: Colors.grey[500],
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 1.0,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              // Scanning Status Box
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surface.withOpacity(0.6),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: Colors.white.withOpacity(0.04)),
-                ),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          width: 8,
-                          height: 8,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: !_nfcAvailable 
-                                ? Colors.red 
-                                : (_isPolling ? theme.colorScheme.primary : Colors.grey),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          !_nfcAvailable ? 'NFC ERROR' : (_isPolling ? 'NFC SCANNER LIVE' : 'SCANNER IDLE'),
-                          style: TextStyle(
-                            fontSize: 9,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1.0,
-                            color: !_nfcAvailable ? Colors.redAccent : Colors.grey[400],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      _status,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        height: 1.2,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
-              // Today's records header
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  "TODAY'S RECORDS",
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.0,
-                    color: Colors.grey[500],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 6),
-
-              // Hydration logs history with single entry removal
-              Expanded(
-                child: todayRecords.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.water_drop_outlined, size: 30, color: Colors.grey[700]),
-                            const SizedBox(height: 4),
-                            Text(
-                              'No drinks logged today yet.',
-                              style: TextStyle(color: Colors.grey[500], fontSize: 12),
-                            ),
-                          ],
-                        ),
-                      )
-                    : ListView.separated(
-                        itemCount: todayRecords.length,
-                        separatorBuilder: (_, __) => const Divider(height: 1, color: Colors.white10),
-                        itemBuilder: (context, index) {
-                          final entry = todayRecords[index];
-                          IconData drinkIcon = Icons.local_drink_rounded;
-                          Color drinkColor = theme.colorScheme.primary;
-                          if (entry.type == 'smoothie') {
-                            drinkIcon = Icons.blender_rounded;
-                            drinkColor = const Color(0xFFF472B6);
-                          } else if (entry.type == 'tea') {
-                            drinkIcon = Icons.emoji_food_beverage_rounded;
-                            drinkColor = const Color(0xFF34D399);
-                          } else if (entry.type == 'juice') {
-                            drinkIcon = Icons.breakfast_dining_rounded;
-                            drinkColor = const Color(0xFFFB923C);
-                          }
-
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 4.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Row(
-                                  children: [
-                                    Icon(
-                                      drinkIcon,
-                                      color: drinkColor.withOpacity(0.8),
-                                      size: 18,
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          '${entry.volumeMl} ml',
-                                          style: const TextStyle(
-                                            fontSize: 15,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                        Text(
-                                          _formatTime(entry.timestamp),
-                                          style: TextStyle(
-                                            color: Colors.grey[500],
-                                            fontSize: 11,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                                // Remove individual log item button
-                                IconButton(
-                                  icon: const Icon(Icons.delete_outline_rounded, size: 20),
-                                  color: Colors.redAccent.withOpacity(0.7),
-                                  padding: EdgeInsets.zero,
-                                  constraints: const BoxConstraints(),
-                                  onPressed: () => _deleteEntry(entry),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final todayTotal = _todayTotalMl;
-    final todayRecords = _todayLogs;
-    final progress = _dailyGoal > 0 ? (todayTotal / _dailyGoal).clamp(0.0, 1.0) : 0.0;
 
     Widget currentBody;
     switch (_currentIndex) {
       case 0:
-        currentBody = _buildHomeTab(context, theme, todayTotal, todayRecords, progress);
+        currentBody = StatsPage(
+          logs: _logs,
+          dailyGoal: _dailyGoal,
+          onLogDrink: (volume, type) => _logWater(volume, type),
+          nfcStatus: _status,
+          nfcAvailable: _nfcAvailable,
+          isPolling: _isPolling,
+        );
         break;
       case 1:
         currentBody = const AlarmPage();
         break;
       case 2:
-        currentBody = StatsPage(
-          logs: _logs,
-          dailyGoal: _dailyGoal,
-          onLogDrink: (volume, type) => _logWater(volume, type),
-        );
-        break;
-      case 3:
         currentBody = SettingsPage(
           onSettingsChanged: () {
             _initStorageAndNfc();
@@ -665,7 +358,14 @@ class _WaterTrackerPageState extends State<WaterTrackerPage> with WidgetsBinding
         );
         break;
       default:
-        currentBody = _buildHomeTab(context, theme, todayTotal, todayRecords, progress);
+        currentBody = StatsPage(
+          logs: _logs,
+          dailyGoal: _dailyGoal,
+          onLogDrink: (volume, type) => _logWater(volume, type),
+          nfcStatus: _status,
+          nfcAvailable: _nfcAvailable,
+          isPolling: _isPolling,
+        );
     }
 
     return Scaffold(
@@ -699,10 +399,6 @@ class _WaterTrackerPageState extends State<WaterTrackerPage> with WidgetsBinding
             BottomNavigationBarItem(
               icon: Icon(Icons.alarm_rounded),
               label: 'Alarm',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.bar_chart_rounded),
-              label: 'Statistics',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.settings_rounded),

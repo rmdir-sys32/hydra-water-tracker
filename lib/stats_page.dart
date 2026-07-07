@@ -5,12 +5,18 @@ class StatsPage extends StatefulWidget {
   final List<WaterLogEntry> logs;
   final int dailyGoal;
   final Function(int volume, String type) onLogDrink;
+  final String nfcStatus;
+  final bool nfcAvailable;
+  final bool isPolling;
 
   const StatsPage({
     super.key,
     required this.logs,
     required this.dailyGoal,
     required this.onLogDrink,
+    required this.nfcStatus,
+    required this.nfcAvailable,
+    required this.isPolling,
   });
 
   @override
@@ -52,137 +58,254 @@ class _StatsPageState extends State<StatsPage> {
     },
   ];
 
+  String _formatTime(DateTime dt) {
+    final hour = dt.hour > 12 ? dt.hour - 12 : (dt.hour == 0 ? 12 : dt.hour);
+    final minute = dt.minute.toString().padLeft(2, '0');
+    final ampm = dt.hour >= 12 ? 'PM' : 'AM';
+    return '$hour:$minute $ampm';
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
+    // Calculate Today's logs
+    final now = DateTime.now();
+    final todayLogs = widget.logs.where((entry) =>
+        entry.timestamp.year == now.year &&
+        entry.timestamp.month == now.month &&
+        entry.timestamp.day == now.day).toList();
+    
+    final todayTotal = todayLogs.fold(0, (sum, entry) => sum + entry.volumeMl);
+    final progress = widget.dailyGoal > 0 ? (todayTotal / widget.dailyGoal).clamp(0.0, 1.0) : 0.0;
+
+    // Get last drink logged description
+    String lastDrinkText = "No drinks logged today yet";
+    if (todayLogs.isNotEmpty) {
+      final last = todayLogs.last;
+      lastDrinkText = "Last: ${last.volumeMl}ml of ${last.type} at ${_formatTime(last.timestamp)}";
+    }
+
     return Scaffold(
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
           children: [
-            // Top Section Header
+            // Header Row
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Select Drink",
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.grey[400],
-                        letterSpacing: 1.0,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    const Text(
-                      "Let's see how things\nare going",
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w900,
-                        height: 1.2,
-                      ),
-                    ),
-                  ],
+                Icon(
+                  Icons.water_drop_rounded,
+                  size: 28,
+                  color: theme.colorScheme.primary,
                 ),
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.04),
-                    shape: BoxShape.circle,
+                const SizedBox(width: 8),
+                const Text(
+                  'Hydrated',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -0.5,
                   ),
-                  child: Icon(Icons.share_rounded, size: 20, color: Colors.grey[300]),
                 ),
               ],
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
 
-            // Time Selector Toggle (Day, Week, Month)
+            // NFC Status Banner
             Container(
-              padding: const EdgeInsets.all(4),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               decoration: BoxDecoration(
-                color: Colors.black26,
-                borderRadius: BorderRadius.circular(16),
+                color: widget.isPolling ? theme.colorScheme.primary.withOpacity(0.08) : Colors.white.withOpacity(0.02),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: widget.isPolling ? theme.colorScheme.primary.withOpacity(0.2) : Colors.white.withOpacity(0.04),
+                ),
               ),
               child: Row(
-                children: ['Day', 'Week', 'Month'].map((tab) {
-                  final isSelected = _selectedTab == tab;
-                  return Expanded(
-                    child: GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          _selectedTab = tab;
-                        });
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
+                children: [
+                  Container(
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: !widget.nfcAvailable 
+                          ? Colors.red 
+                          : (widget.isPolling ? theme.colorScheme.primary : Colors.grey),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      widget.nfcStatus,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: widget.isPolling ? theme.colorScheme.primary : Colors.grey[400],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // STAT 1: Today's Hydration Progress Card (Wave glass theme)
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surface.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: Colors.white.withOpacity(0.04)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.today_rounded, size: 16, color: theme.colorScheme.primary),
+                          const SizedBox(width: 6),
+                          const Text(
+                            "Today's Hydration",
+                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
-                          color: isSelected ? theme.colorScheme.primary : Colors.transparent,
+                          color: Colors.white.withOpacity(0.06),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        alignment: Alignment.center,
                         child: Text(
-                          tab,
+                          "${(progress * 100).toInt()}% Goal",
                           style: TextStyle(
+                            fontSize: 11,
                             fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                            color: isSelected ? Colors.black87 : Colors.grey[400],
+                            color: theme.colorScheme.primary,
                           ),
                         ),
                       ),
-                    ),
-                  );
-                }).toList(),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "$todayTotal ml",
+                            style: const TextStyle(
+                              fontSize: 32,
+                              fontWeight: FontWeight.w900,
+                              height: 1.1,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            "Target: ${widget.dailyGoal} ml",
+                            style: TextStyle(fontSize: 13, color: Colors.grey[400]),
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            lastDrinkText,
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: theme.colorScheme.secondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                      // Styled mini fluid preview ring
+                      Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          SizedBox(
+                            width: 80,
+                            height: 80,
+                            child: CircularProgressIndicator(
+                              value: progress,
+                              strokeWidth: 6,
+                              backgroundColor: Colors.white.withOpacity(0.05),
+                              valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.primary),
+                            ),
+                          ),
+                          Icon(Icons.water_drop_rounded, color: theme.colorScheme.primary, size: 24),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // STAT 2: Weekly / Monthly Hydration Stats Chart Card
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surface.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: Colors.white.withOpacity(0.03)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        "Intake Overview",
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      // Mini selector chip toggle
+                      Row(
+                        children: ['Week', 'Month'].map((tab) {
+                          final isSel = _selectedTab == tab;
+                          return GestureDetector(
+                            onTap: () => setState(() => _selectedTab = tab),
+                            child: Container(
+                              margin: const EdgeInsets.only(left: 8),
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: isSel ? theme.colorScheme.primary.withOpacity(0.12) : Colors.transparent,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: isSel ? theme.colorScheme.primary.withOpacity(0.3) : Colors.transparent),
+                              ),
+                              child: Text(
+                                tab,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: isSel ? theme.colorScheme.primary : Colors.grey[400],
+                                ),
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  _buildStatsChart(theme),
+                ],
               ),
             ),
             const SizedBox(height: 24),
 
-            // Interactive Glass Preview Card (middle screen design)
-            _buildGlassPreviewCard(theme),
-            const SizedBox(height: 24),
-
-            // Hydration Stats Section
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      "Hydration Stats",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Row(
-                      children: [
-                        Text(
-                          "This $_selectedTab",
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: theme.colorScheme.primary,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        Icon(Icons.keyboard_arrow_down_rounded, size: 16, color: theme.colorScheme.primary),
-                      ],
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                _buildStatsChart(theme),
-              ],
-            ),
-            const SizedBox(height: 24),
-
-            // Drink Options Cards (third screen grid)
+            // Quick Drink Logging Section
             const Text(
-              "Quick Logs By Drink Type",
+              "Tap to Log Drink",
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -210,221 +333,24 @@ class _StatsPageState extends State<StatsPage> {
     );
   }
 
-  // Interactive Glass display matching middle mockup
-  Widget _buildGlassPreviewCard(ThemeData theme) {
-    // Total today
-    final now = DateTime.now();
-    final todayTotal = widget.logs
-        .where((entry) =>
-            entry.timestamp.year == now.year &&
-            entry.timestamp.month == now.month &&
-            entry.timestamp.day == now.day)
-        .fold(0, (sum, entry) => sum + entry.volumeMl);
-    
-    final progress = widget.dailyGoal > 0 ? (todayTotal / widget.dailyGoal).clamp(0.0, 1.0) : 0.0;
-
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface.withOpacity(0.5),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withOpacity(0.04)),
-      ),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // Minimized profile heads / drink category icons overlay
-              Row(
-                children: [
-                  Container(
-                    width: 28,
-                    height: 28,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: theme.colorScheme.primary.withOpacity(0.2),
-                    ),
-                    child: Icon(Icons.local_drink_rounded, size: 14, color: theme.colorScheme.primary),
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    "Today's Hydration",
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey[300]),
-                  ),
-                ],
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.06),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  "${widget.logs.where((e) => e.timestamp.day == now.day).length} Logs",
-                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          // Beautiful fluid visual representations
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              // Background glass representation
-              Container(
-                width: 140,
-                height: 140,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    colors: [
-                      theme.colorScheme.primary.withOpacity(0.2),
-                      theme.colorScheme.secondary.withOpacity(0.05),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  border: Border.all(color: Colors.white.withOpacity(0.1)),
-                ),
-                alignment: Alignment.center,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      "$todayTotal/${widget.dailyGoal}",
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
-                    ),
-                    Text(
-                      "ml",
-                      style: TextStyle(fontSize: 11, color: Colors.grey[400], fontWeight: FontWeight.bold),
-                    ),
-                  ],
-                ),
-              ),
-              // Floating action to quickly add
-              Positioned(
-                bottom: 0,
-                right: 20,
-                child: FloatingActionButton.small(
-                  heroTag: 'stats_add_fab',
-                  onPressed: () => widget.onLogDrink(250, 'water'),
-                  backgroundColor: theme.colorScheme.primary,
-                  child: const Icon(Icons.add, color: Colors.black87),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Vertical Bar/Cylinder chart
+  // Vertical Cylinder Charts
   Widget _buildStatsChart(ThemeData theme) {
-    if (_selectedTab == 'Day') {
-      return _buildDayChart(theme);
-    } else if (_selectedTab == 'Month') {
+    if (_selectedTab == 'Month') {
       return _buildMonthChart(theme);
     } else {
       return _buildWeekChart(theme);
     }
   }
 
-  Widget _buildDayChart(ThemeData theme) {
-    // Hourly buckets (6am, 10am, 2pm, 6pm, 10pm)
-    final hours = [6, 10, 14, 18, 22];
-    final hourLabels = ['6 AM', '10 AM', '2 PM', '6 PM', '10 PM'];
-    final now = DateTime.now();
-
-    return Container(
-      height: 180,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface.withOpacity(0.4),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.02)),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: List.generate(hours.length, (index) {
-          final hr = hours[index];
-          // Sum logs within +/- 2 hours of this bucket today
-          final totalInBucket = widget.logs
-              .where((entry) =>
-                  entry.timestamp.year == now.year &&
-                  entry.timestamp.month == now.month &&
-                  entry.timestamp.day == now.day &&
-                  entry.timestamp.hour >= hr - 2 &&
-                  entry.timestamp.hour < hr + 2)
-              .fold(0, (sum, entry) => sum + entry.volumeMl);
-
-          final maxBucketCap = 1000.0;
-          final pct = (totalInBucket / maxBucketCap).clamp(0.0, 1.0);
-
-          return Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Text(
-                  totalInBucket > 0 ? '${totalInBucket}ml' : '',
-                  style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: theme.colorScheme.primary),
-                ),
-                const SizedBox(height: 4),
-                Expanded(
-                  child: Container(
-                    width: 14,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.04),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    alignment: Alignment.bottomCenter,
-                    child: FractionallySizedBox(
-                      heightFactor: pct,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [theme.colorScheme.primary, theme.colorScheme.secondary],
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                          ),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  hourLabels[index],
-                  style: TextStyle(fontSize: 9, color: Colors.grey[400], fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-          );
-        }),
-      ),
-    );
-  }
-
   Widget _buildWeekChart(ThemeData theme) {
     final now = DateTime.now();
-    // Monday to Sunday of the current week
     final weekdayOfNow = now.weekday;
     final monday = now.subtract(Duration(days: weekdayOfNow - 1));
     final weekDays = List.generate(7, (i) => monday.add(Duration(days: i)));
     final dayLabels = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 
-    return Container(
-      height: 180,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface.withOpacity(0.4),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.02)),
-      ),
+    return SizedBox(
+      height: 130,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         crossAxisAlignment: CrossAxisAlignment.end,
@@ -455,7 +381,7 @@ class _StatsPageState extends State<StatsPage> {
                 const SizedBox(height: 4),
                 Expanded(
                   child: Container(
-                    width: 16,
+                    width: 14,
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.04),
                       borderRadius: BorderRadius.circular(10),
@@ -465,20 +391,16 @@ class _StatsPageState extends State<StatsPage> {
                       heightFactor: pct,
                       child: Container(
                         decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: isToday 
-                                ? [theme.colorScheme.primary, theme.colorScheme.secondary]
-                                : [theme.colorScheme.secondary.withOpacity(0.6), theme.colorScheme.secondary.withOpacity(0.3)],
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                          ),
+                          color: isToday 
+                              ? theme.colorScheme.primary 
+                              : theme.colorScheme.primary.withOpacity(0.4),
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 Text(
                   dayLabels[index],
                   style: TextStyle(
@@ -496,7 +418,6 @@ class _StatsPageState extends State<StatsPage> {
   }
 
   Widget _buildMonthChart(ThemeData theme) {
-    // 4 weeks leading up to today
     final now = DateTime.now();
     final weekRanges = List.generate(4, (i) {
       final start = now.subtract(Duration(days: (3 - i) * 7 + 6));
@@ -504,14 +425,8 @@ class _StatsPageState extends State<StatsPage> {
       return {'start': start, 'end': end, 'label': 'W${i + 1}'};
     });
 
-    return Container(
-      height: 180,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface.withOpacity(0.4),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.02)),
-      ),
+    return SizedBox(
+      height: 130,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         crossAxisAlignment: CrossAxisAlignment.end,
@@ -526,7 +441,6 @@ class _StatsPageState extends State<StatsPage> {
                   entry.timestamp.isBefore(end.add(const Duration(days: 1))))
               .fold(0, (sum, entry) => sum + entry.volumeMl);
 
-          // Weekly goal is daily goal * 7
           final weeklyGoal = widget.dailyGoal * 7;
           final pct = weeklyGoal > 0 ? (totalForWeek / weeklyGoal).clamp(0.0, 1.0) : 0.0;
 
@@ -536,33 +450,29 @@ class _StatsPageState extends State<StatsPage> {
               children: [
                 Text(
                   totalForWeek > 0 ? '${(totalForWeek / 1000).toStringAsFixed(1)}L' : '',
-                  style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: theme.colorScheme.primary),
+                  style: TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: theme.colorScheme.primary),
                 ),
                 const SizedBox(height: 4),
                 Expanded(
                   child: Container(
-                    width: 22,
+                    width: 18,
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.04),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(10),
                     ),
                     alignment: Alignment.bottomCenter,
                     child: FractionallySizedBox(
                       heightFactor: pct,
                       child: Container(
                         decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [theme.colorScheme.primary, theme.colorScheme.secondary],
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                          ),
-                          borderRadius: BorderRadius.circular(12),
+                          color: theme.colorScheme.primary,
+                          borderRadius: BorderRadius.circular(10),
                         ),
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 Text(
                   range['label'] as String,
                   style: TextStyle(fontSize: 10, color: Colors.grey[400], fontWeight: FontWeight.bold),
@@ -575,7 +485,6 @@ class _StatsPageState extends State<StatsPage> {
     );
   }
 
-  // Quick drink category card (third mockup design)
   Widget _buildDrinkCard(Map<String, dynamic> drink, ThemeData theme) {
     final type = drink['type'] as String;
     final color = drink['color'] as Color;
