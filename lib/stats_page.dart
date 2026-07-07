@@ -128,9 +128,9 @@ class _StatsPageState extends State<StatsPage> {
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: widget.isPolling ? theme.colorScheme.primary.withOpacity(0.3) : (isLight ? Colors.white.withOpacity(0.7) : Colors.white.withOpacity(0.08)),
-                  ),
+                  border: widget.isPolling
+                      ? Border.all(color: theme.colorScheme.primary.withOpacity(0.3))
+                      : null,
                 ),
                 child: Row(
                   children: [
@@ -172,9 +172,6 @@ class _StatsPageState extends State<StatsPage> {
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(24),
-                  border: Border.all(
-                    color: theme.brightness == Brightness.light ? Colors.white.withOpacity(0.8) : Colors.white.withOpacity(0.08),
-                  ),
                 ),
                 child: Column(
                   children: [
@@ -298,7 +295,6 @@ class _StatsPageState extends State<StatsPage> {
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: Colors.white.withOpacity(0.7)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -325,7 +321,6 @@ class _StatsPageState extends State<StatsPage> {
                                 decoration: BoxDecoration(
                                   color: isSel ? theme.colorScheme.primary.withOpacity(0.12) : Colors.transparent,
                                   borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(color: isSel ? theme.colorScheme.primary.withOpacity(0.3) : Colors.transparent),
                                 ),
                                 child: Text(
                                   tab,
@@ -374,9 +369,6 @@ class _StatsPageState extends State<StatsPage> {
                 child: Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: isLight ? Colors.white.withOpacity(0.7) : Colors.white.withOpacity(0.08),
-                    ),
                   ),
                   child: ListView.separated(
                     shrinkWrap: true,
@@ -603,7 +595,6 @@ class _StatsPageState extends State<StatsPage> {
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.white.withOpacity(0.8)),
         ),
         child: Material(
           color: Colors.transparent,

@@ -51,19 +51,19 @@ class _MyAppState extends State<MyApp> {
           debugShowCheckedModeBanner: false,
           themeMode: currentMode,
           theme: ThemeData.light().copyWith(
-            scaffoldBackgroundColor: const Color(0xFFF1F5F9), // Soft Slate Gray
+            scaffoldBackgroundColor: Colors.white,
             colorScheme: const ColorScheme.light(
-              primary: Color(0xFF0D9488),   // Soft Fresh Teal/Water
-              secondary: Color(0xFF3B82F6), // Clean Water Blue
-              surface: Colors.white,        // White surfaces for glassmorphism
+              primary: Color(0xFF0EA5E9),   // Sky Blue
+              secondary: Color(0xFF38BDF8), // Light Sky Blue
+              surface: Color(0xFFF0F9FF),   // Soft sky blue tint surface
               onSurface: Color(0xFF0F172A), // Dark slate text
             ),
           ),
           darkTheme: ThemeData.dark().copyWith(
             scaffoldBackgroundColor: const Color(0xFF0B132B), // Dark Navy
             colorScheme: const ColorScheme.dark(
-              primary: Color(0xFF0D9488),   // Soft Fresh Teal/Water (no neon AI blue)
-              secondary: Color(0xFF3B82F6), // Clean Water Blue
+              primary: Color(0xFF0EA5E9),   // Sky Blue
+              secondary: Color(0xFF38BDF8), // Light Sky Blue
               surface: Color(0xFF1C2541),   // Dark Midnight Navy
               onSurface: Colors.white,
             ),
@@ -412,13 +412,7 @@ class _WaterTrackerPageState extends State<WaterTrackerPage> with WidgetsBinding
 
     return Scaffold(
       body: SafeArea(child: currentBody),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          border: Border(
-            top: BorderSide(color: Colors.black.withOpacity(0.05), width: 1),
-          ),
-        ),
-        child: BottomNavigationBar(
+      bottomNavigationBar: BottomNavigationBar(
           currentIndex: _currentIndex,
           onTap: (index) {
             setState(() {
@@ -448,7 +442,6 @@ class _WaterTrackerPageState extends State<WaterTrackerPage> with WidgetsBinding
             ),
           ],
         ),
-      ),
     );
   }
 }

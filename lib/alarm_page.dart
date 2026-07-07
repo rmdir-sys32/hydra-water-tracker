@@ -108,7 +108,6 @@ class _AlarmPageState extends State<AlarmPage> {
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.white.withOpacity(0.8)),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -174,9 +173,6 @@ class _AlarmPageState extends State<AlarmPage> {
                         decoration: BoxDecoration(
                           color: isSelected ? theme.colorScheme.primary.withOpacity(0.18) : Colors.transparent,
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: isSelected ? theme.colorScheme.primary : Colors.white10,
-                          ),
                         ),
                         alignment: Alignment.center,
                         child: Text(
@@ -209,7 +205,6 @@ class _AlarmPageState extends State<AlarmPage> {
                 child: Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.white.withOpacity(0.7)),
                   ),
                   child: ListView.separated(
                     shrinkWrap: true,
