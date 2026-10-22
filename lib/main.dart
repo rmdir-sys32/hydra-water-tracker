@@ -1,13 +1,16 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_nfc_kit/flutter_nfc_kit.dart';
+import 'package:home_widget/home_widget.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'alarm_page.dart';
 import 'settings_page.dart';
 import 'stats_page.dart';
-import 'alarm_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -256,9 +259,16 @@ class _WaterTrackerPageState extends State<WaterTrackerPage> with WidgetsBinding
       final jsonList = _logs.map((entry) => entry.toJson()).toList();
       final jsonString = jsonEncode(jsonList);
       await file.writeAsString(jsonString);
+      await _updateHomeWidget();
     } catch (e) {
       debugPrint('Error saving logs to file: $e');
     }
+  }
+
+  Future<void> _updateHomeWidget() async {
+    await HomeWidget.saveWidgetData<int>('today_total_ml', _todayTotalMl);
+    await HomeWidget.saveWidgetData<int>('daily_goal_ml', _dailyGoal);
+    await HomeWidget.updateWidget(name: 'HydrationWidgetProvider');
   }
 
   void _startPolling() {
@@ -382,6 +392,7 @@ class _WaterTrackerPageState extends State<WaterTrackerPage> with WidgetsBinding
           logs: _logs,
           dailyGoal: _dailyGoal,
           onLogDrink: (volume, type) => _logWater(volume, type),
+          onDeleteEntry: _deleteEntry,
           nfcStatus: _status,
           nfcAvailable: _nfcAvailable,
           isPolling: _isPolling,
@@ -414,7 +425,7 @@ class _WaterTrackerPageState extends State<WaterTrackerPage> with WidgetsBinding
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           border: Border(
-            top: BorderSide(color: Colors.black.withOpacity(0.05), width: 1),
+            top: BorderSide(color: Colors.black.withValues(alpha: 0.05), width: 1),
           ),
         ),
         child: BottomNavigationBar(

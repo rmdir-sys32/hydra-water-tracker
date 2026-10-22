@@ -257,18 +257,18 @@ class _SettingsPageState extends State<SettingsPage> {
           widget.onSettingsChanged?.call();
         }
       },
-      selectedColor: theme.colorScheme.primary.withOpacity(0.18),
+      selectedColor: theme.colorScheme.primary.withValues(alpha: 0.18),
       checkmarkColor: theme.colorScheme.primary,
       labelStyle: TextStyle(
         color: isSelected ? theme.colorScheme.primary : (isLight ? Colors.grey[600] : Colors.grey[400]),
         fontWeight: FontWeight.bold,
         fontSize: 13,
       ),
-      backgroundColor: theme.colorScheme.onSurface.withOpacity(0.03),
+      backgroundColor: theme.colorScheme.onSurface.withValues(alpha: 0.03),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
-          color: isSelected ? theme.colorScheme.primary.withOpacity(0.4) : (isLight ? Colors.black.withOpacity(0.05) : Colors.white10),
+          color: isSelected ? theme.colorScheme.primary.withValues(alpha: 0.4) : (isLight ? Colors.black.withValues(alpha: 0.05) : Colors.white10),
         ),
       ),
     );
@@ -291,18 +291,18 @@ class _SettingsPageState extends State<SettingsPage> {
           widget.onSettingsChanged?.call();
         }
       },
-      selectedColor: theme.colorScheme.primary.withOpacity(0.18),
+      selectedColor: theme.colorScheme.primary.withValues(alpha: 0.18),
       checkmarkColor: theme.colorScheme.primary,
       labelStyle: TextStyle(
         color: isSelected ? theme.colorScheme.primary : (isLight ? Colors.grey[600] : Colors.grey[400]),
         fontWeight: FontWeight.bold,
         fontSize: 13,
       ),
-      backgroundColor: theme.colorScheme.onSurface.withOpacity(0.03),
+      backgroundColor: theme.colorScheme.onSurface.withValues(alpha: 0.03),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
-          color: isSelected ? theme.colorScheme.primary.withOpacity(0.4) : (isLight ? Colors.black.withOpacity(0.05) : Colors.white10),
+          color: isSelected ? theme.colorScheme.primary.withValues(alpha: 0.4) : (isLight ? Colors.black.withValues(alpha: 0.05) : Colors.white10),
         ),
       ),
     );
@@ -329,14 +329,14 @@ class _SettingsPageState extends State<SettingsPage> {
             LiquidGlass.withOwnLayer(
               shape: const LiquidRoundedRectangle(borderRadius: 14),
               settings: LiquidGlassSettings(
-                glassColor: theme.colorScheme.surface.withOpacity(isLight ? 0.55 : 0.35),
+                glassColor: theme.colorScheme.surface.withValues(alpha: isLight ? 0.55 : 0.35),
                 blur: 10,
               ),
               child: Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: isLight ? Colors.white.withOpacity(0.8) : Colors.white.withOpacity(0.08)),
+                  border: Border.all(color: isLight ? Colors.white.withValues(alpha: 0.8) : Colors.white.withValues(alpha: 0.08)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -375,14 +375,14 @@ class _SettingsPageState extends State<SettingsPage> {
             LiquidGlass.withOwnLayer(
               shape: const LiquidRoundedRectangle(borderRadius: 14),
               settings: LiquidGlassSettings(
-                glassColor: theme.colorScheme.surface.withOpacity(isLight ? 0.55 : 0.35),
+                glassColor: theme.colorScheme.surface.withValues(alpha: isLight ? 0.55 : 0.35),
                 blur: 10,
               ),
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: isLight ? Colors.white.withOpacity(0.8) : Colors.white.withOpacity(0.08)),
+                  border: Border.all(color: isLight ? Colors.white.withValues(alpha: 0.8) : Colors.white.withValues(alpha: 0.08)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -445,14 +445,14 @@ class _SettingsPageState extends State<SettingsPage> {
                                   contentPadding: EdgeInsets.zero,
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(8),
-                                    borderSide: BorderSide(color: theme.colorScheme.onSurface.withOpacity(0.1)),
+                                    borderSide: BorderSide(color: theme.colorScheme.onSurface.withValues(alpha: 0.1)),
                                   ),
                                   focusedBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(8),
                                     borderSide: BorderSide(color: theme.colorScheme.primary),
                                   ),
                                   filled: true,
-                                  fillColor: theme.colorScheme.onSurface.withOpacity(0.05),
+                                  fillColor: theme.colorScheme.onSurface.withValues(alpha: 0.05),
                                 ),
                                 onChanged: (text) {
                                   int? val = int.tryParse(text);
@@ -502,14 +502,14 @@ class _SettingsPageState extends State<SettingsPage> {
             LiquidGlass.withOwnLayer(
               shape: const LiquidRoundedRectangle(borderRadius: 14),
               settings: LiquidGlassSettings(
-                glassColor: theme.colorScheme.surface.withOpacity(isLight ? 0.55 : 0.35),
+                glassColor: theme.colorScheme.surface.withValues(alpha: isLight ? 0.55 : 0.35),
                 blur: 10,
               ),
               child: Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: isLight ? Colors.white.withOpacity(0.8) : Colors.white.withOpacity(0.08)),
+                  border: Border.all(color: isLight ? Colors.white.withValues(alpha: 0.8) : Colors.white.withValues(alpha: 0.08)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -586,14 +586,14 @@ class _SettingsPageState extends State<SettingsPage> {
                                     contentPadding: EdgeInsets.zero,
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(8),
-                                      borderSide: BorderSide(color: theme.colorScheme.onSurface.withOpacity(0.1)),
+                                      borderSide: BorderSide(color: theme.colorScheme.onSurface.withValues(alpha: 0.1)),
                                     ),
                                     focusedBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(8),
                                       borderSide: BorderSide(color: theme.colorScheme.primary),
                                     ),
                                     filled: true,
-                                    fillColor: theme.colorScheme.onSurface.withOpacity(0.05),
+                                    fillColor: theme.colorScheme.onSurface.withValues(alpha: 0.05),
                                   ),
                                   onChanged: (text) {
                                     int? val = int.tryParse(text);
@@ -646,14 +646,14 @@ class _SettingsPageState extends State<SettingsPage> {
             LiquidGlass.withOwnLayer(
               shape: const LiquidRoundedRectangle(borderRadius: 14),
               settings: LiquidGlassSettings(
-                glassColor: theme.colorScheme.surface.withOpacity(isLight ? 0.55 : 0.35),
+                glassColor: theme.colorScheme.surface.withValues(alpha: isLight ? 0.55 : 0.35),
                 blur: 10,
               ),
               child: Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: isLight ? Colors.white.withOpacity(0.8) : Colors.white.withOpacity(0.08)),
+                  border: Border.all(color: isLight ? Colors.white.withValues(alpha: 0.8) : Colors.white.withValues(alpha: 0.08)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -684,13 +684,13 @@ class _SettingsPageState extends State<SettingsPage> {
                           child: ElevatedButton.icon(
                             onPressed: _exportLogs,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
+                              backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.1),
                               foregroundColor: theme.colorScheme.primary,
                               elevation: 0,
                               padding: const EdgeInsets.symmetric(vertical: 12),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                side: BorderSide(color: theme.colorScheme.primary.withOpacity(0.2)),
+                                side: BorderSide(color: theme.colorScheme.primary.withValues(alpha: 0.2)),
                               ),
                             ),
                             icon: const Icon(Icons.copy_all_rounded, size: 18),
@@ -702,13 +702,13 @@ class _SettingsPageState extends State<SettingsPage> {
                           child: ElevatedButton.icon(
                             onPressed: _showImportDialog,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: theme.colorScheme.secondary.withOpacity(0.1),
+                              backgroundColor: theme.colorScheme.secondary.withValues(alpha: 0.1),
                               foregroundColor: theme.colorScheme.secondary,
                               elevation: 0,
                               padding: const EdgeInsets.symmetric(vertical: 12),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                side: BorderSide(color: theme.colorScheme.secondary.withOpacity(0.2)),
+                                side: BorderSide(color: theme.colorScheme.secondary.withValues(alpha: 0.2)),
                               ),
                             ),
                             icon: const Icon(Icons.install_mobile_rounded, size: 18),
@@ -730,7 +730,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 style: OutlinedButton.styleFrom(
                   foregroundColor: _confirmReset ? Colors.redAccent : (isLight ? Colors.grey[700] : Colors.grey[400]),
                   side: BorderSide(
-                    color: _confirmReset ? Colors.redAccent.withOpacity(0.5) : (isLight ? Colors.black.withOpacity(0.1) : Colors.white10),
+                    color: _confirmReset ? Colors.redAccent.withValues(alpha: 0.5) : (isLight ? Colors.black.withValues(alpha: 0.1) : Colors.white10),
                   ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),

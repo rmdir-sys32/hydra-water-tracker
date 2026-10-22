@@ -1,6 +1,88 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:liquid_glass_renderer/liquid_glass_renderer.dart';
+
 import 'main.dart'; // To access WaterLogEntry
+
+class HydrationProgressCircle extends StatelessWidget {
+  final double progress;
+  final int amountMl;
+  final int dailyGoal;
+
+  const HydrationProgressCircle({
+    super.key,
+    required this.progress,
+    required this.amountMl,
+    required this.dailyGoal,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final percentage = (progress * 100).toInt();
+
+    return SizedBox(
+      width: 200,
+      height: 200,
+      child: ClipOval(
+        child: BackdropFilter(
+          filter: ui.ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: theme.colorScheme.surface.withValues(alpha: 0.28),
+              border: Border.all(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.1),
+              ),
+            ),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                SizedBox(
+                  width: 168,
+                  height: 168,
+                  child: CircularProgressIndicator(
+                    value: progress,
+                    strokeWidth: 7,
+                    backgroundColor: theme.colorScheme.onSurface.withValues(
+                      alpha: 0.08,
+                    ),
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      theme.colorScheme.primary,
+                    ),
+                  ),
+                ),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      '$amountMl',
+                      style: const TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    Text(
+                      'ml  ·  $percentage%',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.6,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
 
 class StatsPage extends StatefulWidget {
   final List<WaterLogEntry> logs;
@@ -75,19 +157,26 @@ class _StatsPageState extends State<StatsPage> {
 
     // Calculate Today's logs
     final now = DateTime.now();
-    final todayLogs = widget.logs.where((entry) =>
-        entry.timestamp.year == now.year &&
-        entry.timestamp.month == now.month &&
-        entry.timestamp.day == now.day).toList();
-    
+    final todayLogs = widget.logs
+        .where(
+          (entry) =>
+              entry.timestamp.year == now.year &&
+              entry.timestamp.month == now.month &&
+              entry.timestamp.day == now.day,
+        )
+        .toList();
+
     final todayTotal = todayLogs.fold(0, (sum, entry) => sum + entry.volumeMl);
-    final progress = widget.dailyGoal > 0 ? (todayTotal / widget.dailyGoal).clamp(0.0, 1.0) : 0.0;
+    final progress = widget.dailyGoal > 0
+        ? (todayTotal / widget.dailyGoal).clamp(0.0, 1.0)
+        : 0.0;
 
     // Get last drink logged description
     String lastDrinkText = "No drinks logged today yet";
     if (todayLogs.isNotEmpty) {
       final last = todayLogs.last;
-      lastDrinkText = "Last: ${last.volumeMl}ml of ${last.type} at ${_formatTime(last.timestamp)}";
+      lastDrinkText =
+          "Last: ${last.volumeMl}ml of ${last.type} at ${_formatTime(last.timestamp)}";
     }
 
     return Scaffold(
@@ -121,15 +210,28 @@ class _StatsPageState extends State<StatsPage> {
             LiquidGlass.withOwnLayer(
               shape: const LiquidRoundedRectangle(borderRadius: 14),
               settings: LiquidGlassSettings(
-                glassColor: widget.isPolling ? theme.colorScheme.primary.withOpacity(isLight ? 0.1 : 0.08) : theme.colorScheme.surface.withOpacity(isLight ? 0.65 : 0.4),
+                glassColor: widget.isPolling
+                    ? theme.colorScheme.primary.withValues(
+                        alpha: isLight ? 0.1 : 0.08,
+                      )
+                    : theme.colorScheme.surface.withValues(
+                        alpha: isLight ? 0.65 : 0.4,
+                      ),
                 blur: 10,
               ),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(
-                    color: widget.isPolling ? theme.colorScheme.primary.withOpacity(0.3) : (isLight ? Colors.white.withOpacity(0.7) : Colors.white.withOpacity(0.08)),
+                    color: widget.isPolling
+                        ? theme.colorScheme.primary.withValues(alpha: 0.3)
+                        : (isLight
+                              ? Colors.white.withValues(alpha: 0.7)
+                              : Colors.white.withValues(alpha: 0.08)),
                   ),
                 ),
                 child: Row(
@@ -139,9 +241,11 @@ class _StatsPageState extends State<StatsPage> {
                       height: 8,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: !widget.nfcAvailable 
-                            ? Colors.red 
-                            : (widget.isPolling ? theme.colorScheme.primary : Colors.grey),
+                        color: !widget.nfcAvailable
+                            ? Colors.red
+                            : (widget.isPolling
+                                  ? theme.colorScheme.primary
+                                  : Colors.grey),
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -151,7 +255,9 @@ class _StatsPageState extends State<StatsPage> {
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
-                          color: widget.isPolling ? theme.colorScheme.primary : Colors.grey[400],
+                          color: widget.isPolling
+                              ? theme.colorScheme.primary
+                              : Colors.grey[400],
                         ),
                       ),
                     ),
@@ -165,7 +271,9 @@ class _StatsPageState extends State<StatsPage> {
             LiquidGlass.withOwnLayer(
               shape: const LiquidRoundedRectangle(borderRadius: 24),
               settings: LiquidGlassSettings(
-                glassColor: theme.colorScheme.surface.withOpacity(theme.brightness == Brightness.light ? 0.6 : 0.45),
+                glassColor: theme.colorScheme.surface.withValues(
+                  alpha: theme.brightness == Brightness.light ? 0.6 : 0.45,
+                ),
                 blur: 15,
               ),
               child: Container(
@@ -173,7 +281,9 @@ class _StatsPageState extends State<StatsPage> {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(
-                    color: theme.brightness == Brightness.light ? Colors.white.withOpacity(0.8) : Colors.white.withOpacity(0.08),
+                    color: theme.brightness == Brightness.light
+                        ? Colors.white.withValues(alpha: 0.8)
+                        : Colors.white.withValues(alpha: 0.08),
                   ),
                 ),
                 child: Column(
@@ -181,105 +291,74 @@ class _StatsPageState extends State<StatsPage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.today_rounded, size: 16, color: theme.colorScheme.primary),
+                        Icon(
+                          Icons.today_rounded,
+                          size: 16,
+                          color: theme.colorScheme.primary,
+                        ),
                         const SizedBox(width: 6),
                         const Text(
                           "Today's Hydration",
-                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 24),
                     Center(
-                      child: Stack(
-                        alignment: Alignment.center,
+                      child: HydrationProgressCircle(
+                        key: const Key('daily-hydration-circle'),
+                        progress: progress.toDouble(),
+                        amountMl: todayTotal,
+                        dailyGoal: widget.dailyGoal,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      lastDrinkText,
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                        color: theme.colorScheme.secondary,
+                      ),
+                      textAlign: TextAlign.center,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 6),
+                    Text.rich(
+                      TextSpan(
                         children: [
-                          // Large outer wheel
-                          SizedBox(
-                            width: 200,
-                            height: 200,
-                            child: CircularProgressIndicator(
-                              value: progress,
-                              strokeWidth: 10,
-                              backgroundColor: theme.colorScheme.onSurface.withOpacity(0.05),
-                              valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.primary),
+                          WidgetSpan(
+                            alignment: PlaceholderAlignment.middle,
+                            child: Icon(
+                              Icons.nfc_rounded,
+                              size: 11,
+                              color:
+                                  (theme.brightness == Brightness.light
+                                          ? Colors.grey[600]
+                                          : Colors.grey[400])!
+                                      .withValues(alpha: 0.5),
                             ),
                           ),
-                          // Content inside the wheel
-                          SizedBox(
-                            width: 170,
-                            height: 170,
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.water_drop_rounded,
-                                  color: theme.colorScheme.primary,
-                                  size: 28,
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  "$todayTotal ml",
-                                  style: const TextStyle(
-                                    fontSize: 26,
-                                    fontWeight: FontWeight.w900,
-                                    letterSpacing: -0.5,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  "${(progress * 100).toInt()}% of ${widget.dailyGoal} ml",
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.bold,
-                                    color: theme.brightness == Brightness.light ? Colors.grey[600] : Colors.grey[400],
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                                  child: Text(
-                                    lastDrinkText,
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w600,
-                                      color: theme.colorScheme.secondary,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                                const SizedBox(height: 6),
-                                Text.rich(
-                                  TextSpan(
-                                    children: [
-                                      WidgetSpan(
-                                        alignment: PlaceholderAlignment.middle,
-                                        child: Icon(
-                                          Icons.nfc_rounded,
-                                          size: 11,
-                                          color: (theme.brightness == Brightness.light ? Colors.grey[600] : Colors.grey[400])!.withOpacity(0.5),
-                                        ),
-                                      ),
-                                      const TextSpan(text: ' '),
-                                      TextSpan(
-                                        text: 'Tap NFC to log',
-                                        style: TextStyle(
-                                          fontSize: 9,
-                                          fontWeight: FontWeight.bold,
-                                          color: (theme.brightness == Brightness.light ? Colors.grey[600] : Colors.grey[400])!.withOpacity(0.5),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ],
+                          const TextSpan(text: ' '),
+                          TextSpan(
+                            text: 'Tap NFC to log',
+                            style: TextStyle(
+                              fontSize: 9,
+                              fontWeight: FontWeight.bold,
+                              color:
+                                  (theme.brightness == Brightness.light
+                                          ? Colors.grey[600]
+                                          : Colors.grey[400])!
+                                      .withValues(alpha: 0.5),
                             ),
                           ),
                         ],
                       ),
+                      textAlign: TextAlign.center,
                     ),
                   ],
                 ),
@@ -291,14 +370,16 @@ class _StatsPageState extends State<StatsPage> {
             LiquidGlass.withOwnLayer(
               shape: const LiquidRoundedRectangle(borderRadius: 24),
               settings: LiquidGlassSettings(
-                glassColor: theme.colorScheme.surface.withOpacity(0.5),
+                glassColor: theme.colorScheme.surface.withValues(alpha: 0.5),
                 blur: 12,
               ),
               child: Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: Colors.white.withOpacity(0.7)),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.7),
+                  ),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -321,18 +402,33 @@ class _StatsPageState extends State<StatsPage> {
                               onTap: () => setState(() => _selectedTab = tab),
                               child: Container(
                                 margin: const EdgeInsets.only(left: 8),
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 4,
+                                ),
                                 decoration: BoxDecoration(
-                                  color: isSel ? theme.colorScheme.primary.withOpacity(0.12) : Colors.transparent,
+                                  color: isSel
+                                      ? theme.colorScheme.primary.withValues(
+                                          alpha: 0.12,
+                                        )
+                                      : Colors.transparent,
                                   borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(color: isSel ? theme.colorScheme.primary.withOpacity(0.3) : Colors.transparent),
+                                  border: Border.all(
+                                    color: isSel
+                                        ? theme.colorScheme.primary.withValues(
+                                            alpha: 0.3,
+                                          )
+                                        : Colors.transparent,
+                                  ),
                                 ),
                                 child: Text(
                                   tab,
                                   style: TextStyle(
                                     fontSize: 11,
                                     fontWeight: FontWeight.bold,
-                                    color: isSel ? theme.colorScheme.primary : Colors.grey[400],
+                                    color: isSel
+                                        ? theme.colorScheme.primary
+                                        : Colors.grey[400],
                                   ),
                                 ),
                               ),
@@ -353,14 +449,15 @@ class _StatsPageState extends State<StatsPage> {
             if (todayLogs.isNotEmpty) ...[
               Row(
                 children: [
-                  Icon(Icons.history_rounded, size: 16, color: theme.colorScheme.primary),
+                  Icon(
+                    Icons.history_rounded,
+                    size: 16,
+                    color: theme.colorScheme.primary,
+                  ),
                   const SizedBox(width: 6),
                   const Text(
                     "Today's History",
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
@@ -368,14 +465,18 @@ class _StatsPageState extends State<StatsPage> {
               LiquidGlass.withOwnLayer(
                 shape: const LiquidRoundedRectangle(borderRadius: 20),
                 settings: LiquidGlassSettings(
-                  glassColor: theme.colorScheme.surface.withOpacity(isLight ? 0.5 : 0.35),
+                  glassColor: theme.colorScheme.surface.withValues(
+                    alpha: isLight ? 0.5 : 0.35,
+                  ),
                   blur: 10,
                 ),
                 child: Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: isLight ? Colors.white.withOpacity(0.7) : Colors.white.withOpacity(0.08),
+                      color: isLight
+                          ? Colors.white.withValues(alpha: 0.7)
+                          : Colors.white.withValues(alpha: 0.08),
                     ),
                   ),
                   child: ListView.separated(
@@ -384,7 +485,9 @@ class _StatsPageState extends State<StatsPage> {
                     itemCount: todayLogs.length,
                     separatorBuilder: (context, index) => Divider(
                       height: 1,
-                      color: isLight ? Colors.black.withOpacity(0.05) : Colors.white.withOpacity(0.05),
+                      color: isLight
+                          ? Colors.black.withValues(alpha: 0.05)
+                          : Colors.white.withValues(alpha: 0.05),
                     ),
                     itemBuilder: (context, index) {
                       final entry = todayLogs[todayLogs.length - 1 - index];
@@ -393,7 +496,9 @@ class _StatsPageState extends State<StatsPage> {
                         leading: Container(
                           padding: const EdgeInsets.all(6),
                           decoration: BoxDecoration(
-                            color: theme.colorScheme.primary.withOpacity(0.1),
+                            color: theme.colorScheme.primary.withValues(
+                              alpha: 0.1,
+                            ),
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
@@ -413,11 +518,17 @@ class _StatsPageState extends State<StatsPage> {
                           _formatTime(entry.timestamp),
                           style: TextStyle(
                             fontSize: 11,
-                            color: isLight ? Colors.grey[600] : Colors.grey[400],
+                            color: isLight
+                                ? Colors.grey[600]
+                                : Colors.grey[400],
                           ),
                         ),
                         trailing: IconButton(
-                          icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 18),
+                          icon: const Icon(
+                            Icons.delete_outline_rounded,
+                            color: Colors.redAccent,
+                            size: 18,
+                          ),
                           onPressed: () {
                             widget.onDeleteEntry?.call(entry);
                           },
@@ -459,14 +570,21 @@ class _StatsPageState extends State<StatsPage> {
         children: List.generate(7, (index) {
           final date = weekDays[index];
           final totalForDay = widget.logs
-              .where((entry) =>
-                  entry.timestamp.year == date.year &&
-                  entry.timestamp.month == date.month &&
-                  entry.timestamp.day == date.day)
+              .where(
+                (entry) =>
+                    entry.timestamp.year == date.year &&
+                    entry.timestamp.month == date.month &&
+                    entry.timestamp.day == date.day,
+              )
               .fold(0, (sum, entry) => sum + entry.volumeMl);
 
-          final pct = widget.dailyGoal > 0 ? (totalForDay / widget.dailyGoal).clamp(0.0, 1.0) : 0.0;
-          final isToday = date.day == now.day && date.month == now.month && date.year == now.year;
+          final pct = widget.dailyGoal > 0
+              ? (totalForDay / widget.dailyGoal).clamp(0.0, 1.0)
+              : 0.0;
+          final isToday =
+              date.day == now.day &&
+              date.month == now.month &&
+              date.year == now.year;
 
           return Expanded(
             child: Column(
@@ -477,7 +595,9 @@ class _StatsPageState extends State<StatsPage> {
                   style: TextStyle(
                     fontSize: 8,
                     fontWeight: FontWeight.bold,
-                    color: isToday ? theme.colorScheme.primary : Colors.grey[500],
+                    color: isToday
+                        ? theme.colorScheme.primary
+                        : Colors.grey[500],
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -485,7 +605,9 @@ class _StatsPageState extends State<StatsPage> {
                   child: Container(
                     width: 14,
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.onSurface.withOpacity(0.05),
+                      color: theme.colorScheme.onSurface.withValues(
+                        alpha: 0.05,
+                      ),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     alignment: Alignment.bottomCenter,
@@ -493,9 +615,11 @@ class _StatsPageState extends State<StatsPage> {
                       heightFactor: pct,
                       child: Container(
                         decoration: BoxDecoration(
-                          color: isToday 
-                              ? theme.colorScheme.primary 
-                              : theme.colorScheme.primary.withOpacity(0.4),
+                          color: isToday
+                              ? theme.colorScheme.primary
+                              : theme.colorScheme.primary.withValues(
+                                  alpha: 0.4,
+                                ),
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
@@ -506,8 +630,10 @@ class _StatsPageState extends State<StatsPage> {
                 Text(
                   dayLabels[index],
                   style: TextStyle(
-                    fontSize: 10, 
-                    color: isToday ? theme.colorScheme.primary : Colors.grey[400], 
+                    fontSize: 10,
+                    color: isToday
+                        ? theme.colorScheme.primary
+                        : Colors.grey[400],
                     fontWeight: isToday ? FontWeight.w800 : FontWeight.bold,
                   ),
                 ),
@@ -538,28 +664,42 @@ class _StatsPageState extends State<StatsPage> {
           final end = range['end'] as DateTime;
 
           final totalForWeek = widget.logs
-              .where((entry) =>
-                  entry.timestamp.isAfter(start.subtract(const Duration(seconds: 1))) &&
-                  entry.timestamp.isBefore(end.add(const Duration(days: 1))))
+              .where(
+                (entry) =>
+                    entry.timestamp.isAfter(
+                      start.subtract(const Duration(seconds: 1)),
+                    ) &&
+                    entry.timestamp.isBefore(end.add(const Duration(days: 1))),
+              )
               .fold(0, (sum, entry) => sum + entry.volumeMl);
 
           final weeklyGoal = widget.dailyGoal * 7;
-          final pct = weeklyGoal > 0 ? (totalForWeek / weeklyGoal).clamp(0.0, 1.0) : 0.0;
+          final pct = weeklyGoal > 0
+              ? (totalForWeek / weeklyGoal).clamp(0.0, 1.0)
+              : 0.0;
 
           return Expanded(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Text(
-                  totalForWeek > 0 ? '${(totalForWeek / 1000).toStringAsFixed(1)}L' : '',
-                  style: TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: theme.colorScheme.primary),
+                  totalForWeek > 0
+                      ? '${(totalForWeek / 1000).toStringAsFixed(1)}L'
+                      : '',
+                  style: TextStyle(
+                    fontSize: 8,
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.primary,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Expanded(
                   child: Container(
                     width: 24,
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.onSurface.withOpacity(0.05),
+                      color: theme.colorScheme.onSurface.withValues(
+                        alpha: 0.05,
+                      ),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     alignment: Alignment.bottomCenter,
@@ -577,7 +717,11 @@ class _StatsPageState extends State<StatsPage> {
                 const SizedBox(height: 6),
                 Text(
                   range['label'] as String,
-                  style: TextStyle(fontSize: 10, color: Colors.grey[400], fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: Colors.grey[400],
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
@@ -597,13 +741,13 @@ class _StatsPageState extends State<StatsPage> {
     return LiquidGlass.withOwnLayer(
       shape: const LiquidRoundedRectangle(borderRadius: 20),
       settings: LiquidGlassSettings(
-        glassColor: theme.colorScheme.surface.withOpacity(0.55),
+        glassColor: theme.colorScheme.surface.withValues(alpha: 0.55),
         blur: 8,
       ),
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.white.withOpacity(0.8)),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.8)),
         ),
         child: Material(
           color: Colors.transparent,
@@ -632,12 +776,16 @@ class _StatsPageState extends State<StatsPage> {
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: color.withOpacity(0.12),
+                          color: color.withValues(alpha: 0.12),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(icon, color: color, size: 20),
                       ),
-                      Icon(Icons.arrow_outward_rounded, color: Colors.grey[600], size: 16),
+                      Icon(
+                        Icons.arrow_outward_rounded,
+                        color: Colors.grey[600],
+                        size: 16,
+                      ),
                     ],
                   ),
                   Column(

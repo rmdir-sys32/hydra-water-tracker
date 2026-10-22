@@ -101,14 +101,14 @@ class _AlarmPageState extends State<AlarmPage> {
             LiquidGlass.withOwnLayer(
               shape: const LiquidRoundedRectangle(borderRadius: 20),
               settings: LiquidGlassSettings(
-                glassColor: theme.colorScheme.surface.withOpacity(0.6),
+                glassColor: theme.colorScheme.surface.withValues(alpha: 0.6),
                 blur: 12,
               ),
               child: Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.white.withOpacity(0.8)),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.8)),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -118,7 +118,7 @@ class _AlarmPageState extends State<AlarmPage> {
                         Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: theme.colorScheme.primary.withOpacity(0.1),
+                            color: theme.colorScheme.primary.withValues(alpha: 0.1),
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
@@ -146,7 +146,7 @@ class _AlarmPageState extends State<AlarmPage> {
                     Switch(
                       value: _remindersEnabled,
                       onChanged: _toggleReminders,
-                      activeColor: theme.colorScheme.primary,
+                      activeThumbColor: theme.colorScheme.primary,
                     ),
                   ],
                 ),
@@ -172,7 +172,7 @@ class _AlarmPageState extends State<AlarmPage> {
                         margin: const EdgeInsets.symmetric(horizontal: 4),
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         decoration: BoxDecoration(
-                          color: isSelected ? theme.colorScheme.primary.withOpacity(0.18) : Colors.transparent,
+                          color: isSelected ? theme.colorScheme.primary.withValues(alpha: 0.18) : Colors.transparent,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
                             color: isSelected ? theme.colorScheme.primary : Colors.white10,
@@ -203,19 +203,19 @@ class _AlarmPageState extends State<AlarmPage> {
               LiquidGlass.withOwnLayer(
                 shape: const LiquidRoundedRectangle(borderRadius: 20),
                 settings: LiquidGlassSettings(
-                  glassColor: theme.colorScheme.surface.withOpacity(0.5),
+                  glassColor: theme.colorScheme.surface.withValues(alpha: 0.5),
                   blur: 10,
                 ),
                 child: Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.white.withOpacity(0.7)),
+                    border: Border.all(color: Colors.white.withValues(alpha: 0.7)),
                   ),
                   child: ListView.separated(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: _fixedReminders.length,
-                    separatorBuilder: (context, index) => Divider(height: 1, color: Colors.black.withOpacity(0.05)),
+                    separatorBuilder: (context, index) => Divider(height: 1, color: Colors.black.withValues(alpha: 0.05)),
                     itemBuilder: (context, index) {
                       final item = _fixedReminders[index];
                       final bool isEnabled = item['enabled'] as bool;
@@ -224,7 +224,7 @@ class _AlarmPageState extends State<AlarmPage> {
                       return ListTile(
                         leading: Icon(
                           Icons.access_time_filled_rounded,
-                          color: isEnabled ? theme.colorScheme.primary.withOpacity(0.8) : Colors.grey[400],
+                          color: isEnabled ? theme.colorScheme.primary.withValues(alpha: 0.8) : Colors.grey[400],
                           size: 20,
                         ),
                         title: Text(
@@ -238,7 +238,7 @@ class _AlarmPageState extends State<AlarmPage> {
                         trailing: Switch(
                           value: isEnabled,
                           onChanged: (val) => _toggleSingleReminder(index, val),
-                          activeColor: theme.colorScheme.primary,
+                          activeThumbColor: theme.colorScheme.primary,
                         ),
                       );
                     },

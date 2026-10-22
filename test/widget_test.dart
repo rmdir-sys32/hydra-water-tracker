@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nfc_counter/main.dart';
-import 'package:nfc_counter/settings_page.dart';
 
 void main() {
   testWidgets('App loads and displays header', (WidgetTester tester) async {
